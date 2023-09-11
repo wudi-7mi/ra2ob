@@ -1,2 +1,2 @@
-# ra2ob
-An Ra2 observer deeply inspired by ra2viewer.
+# Ra2ob
+An Ra2 observer deeply inspired by [ra2viewer](https://github.com/chenguokai/ra2viewer)
