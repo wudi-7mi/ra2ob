@@ -1,0 +1,18 @@
+[
+  {
+    "Name": "Balance",
+    "Offset": "0x30c"
+  },
+  {
+    "Name": "Credit spent",
+    "Offset": "0x2dc"
+  },
+  {
+    "Name": "Power output",
+    "Offset": "0x53a4"
+  },
+  {
+    "Name": "Power drain",
+    "Offset": "0x53a8"
+  }
+]

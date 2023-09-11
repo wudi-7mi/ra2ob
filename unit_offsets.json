@@ -1,0 +1,217 @@
+{
+  "Soviet": {
+    "Building": [
+      {
+        "Name": "Soviet war factory",
+        "Offset": "0x38"
+      }
+    ],
+    "Tank": [
+      {
+        "Name": "War miner",
+        "Offset": "0x4"
+      },
+      {
+        "Name": "Rhino tank",
+        "Offset": "0xc"
+      },
+      {
+        "Name": "Flak track",
+        "Offset": "0x44"
+      },
+      {
+        "Name": "Tesla tank",
+        "Offset": "0x74"
+      },
+      {
+        "Name": "Apocalypse tank",
+        "Offset": "0x20"
+      },
+      {
+        "Name": "V3 rocket launcher",
+        "Offset": "0x38"
+      },
+      {
+        "Name": "Terror Drone",
+        "Offset": "0x40"
+      },
+      {
+        "Name": "Giant squid",
+        "Offset": "0x60"
+      },
+      {
+        "Name": "Kirov airship",
+        "Offset": "0x3c"
+      },
+      {
+        "Name": "Soviet MCV",
+        "Offset": "0x68"
+      },
+      {
+        "Name": "Dreadnought",
+        "Offset": "0x58"
+      },
+      {
+        "Name": "Typhoon attack submarine",
+        "Offset": "0x4c"
+      },
+      {
+        "Name": "Sea Scorpion",
+        "Offset": "0x90"
+      },
+      {
+        "Name": "Amphibious transport",
+        "Offset": "0x10"
+      },
+      {
+        "Name": "Demolition truck",
+        "Offset": "0xa4"
+      }
+    ],
+    "Infantry": [
+      {
+        "Name": "Soviet Attack dog",
+        "Offset": "0x24"
+      },
+      {
+        "Name": "Conscript",
+        "Offset": "0x4"
+      },
+      {
+        "Name": "Soviet Engineer",
+        "Offset": "0x6c"
+      },
+      {
+        "Name": "Tesla trooper",
+        "Offset": "0x8"
+      },
+      {
+        "Name": "Crazy Ivan",
+        "Offset": "0x1c"
+      },
+      {
+        "Name": "Yuri",
+        "Offset": "0x18"
+      },
+      {
+        "Name": "Desolator",
+        "Offset": "0x20"
+      },
+      {
+        "Name": "Terrorist",
+        "Offset": "0x68"
+      }
+    ],
+    "Aircraft": []
+  },
+  "Allied": {
+    "Building": [
+      {
+        "Name": "Allied war factory",
+        "Offset": "0x1c"
+      },
+      {
+        "Name": "Grand cannon",
+        "Offset": "0x100"
+      }
+    ],
+    "Tank": [
+      {
+        "Name": "Chrono Miner",
+        "Offset": "0x84"
+      },
+      {
+        "Name": "Grizzly Battle Tank",
+        "Offset": "0x24"
+      },
+      {
+        "Name": "Mirage tank",
+        "Offset": "0x94"
+      },
+      {
+        "Name": "Prism tank",
+        "Offset": "0x88"
+      },
+      {
+        "Name": "Allied MCV",
+        "Offset": "0x0"
+      },
+      {
+        "Name": "Amphibious transport",
+        "Offset": "0x54"
+      },
+      {
+        "Name": "Destoryer",
+        "Offset": "0x48"
+      },
+      {
+        "Name": "Dolphin",
+        "Offset": "0x64"
+      },
+      {
+        "Name": "Aegis cruiser",
+        "Offset": "0x50"
+      },
+      {
+        "Name": "Aircraft carrier",
+        "Offset": "0x34"
+      },
+      {
+        "Name": "NightHawk transport",
+        "Offset": "0x5c"
+      },
+      {
+        "Name": "Tank destoyer",
+        "Offset": "0x6c"
+      },
+      {
+        "Name": "Infantry Fighting Vehicle",
+        "Offset": "0x98"
+      }
+    ],
+    "Infantry": [
+      {
+        "Name": "Allied Attack dog",
+        "Offset": "0x70"
+      },
+      {
+        "Name": "GI",
+        "Offset": "0x0"
+      },
+      {
+        "Name": "Allied Engineer",
+        "Offset": "0xc"
+      },
+      {
+        "Name": "Chrono legionnaire",
+        "Offset": "0x3c"
+      },
+      {
+        "Name": "Spy",
+        "Offset": "0x40"
+      },
+      {
+        "Name": "Tanya",
+        "Offset": "0x60"
+      },
+      {
+        "Name": "Sniper",
+        "Offset": "0x54"
+      },
+      {
+        "Name": "Rocketeer",
+        "Offset": "0x10"
+      }
+    ],
+    "Aircraft": [
+      {
+        "Name": "Harrier",
+        "Offset": "0x4"
+      },
+      {
+        "Name": "Black Eagle",
+        "Offset": "0x1c"
+      }
+    ]
+  }
+}
