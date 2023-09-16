@@ -2,33 +2,33 @@
   "Soviet": {
     "Building": [
       {
-        "Name": "Soviet war factory",
+        "Name": "Soviet War Factory",
         "Offset": "0x38"
       }
     ],
     "Tank": [
       {
-        "Name": "War miner",
+        "Name": "War Miner",
         "Offset": "0x4"
       },
       {
-        "Name": "Rhino tank",
+        "Name": "Rhino Tank",
         "Offset": "0xc"
       },
       {
-        "Name": "Flak track",
+        "Name": "Flak Track",
         "Offset": "0x44"
       },
       {
-        "Name": "Tesla tank",
+        "Name": "Tesla Tank",
         "Offset": "0x74"
       },
       {
-        "Name": "Apocalypse tank",
-        "Offset": "0x20"
+        "Name": "Apocalypse Tank",
+        "Offset": "0x8"
       },
       {
-        "Name": "V3 rocket launcher",
+        "Name": "V3 Rocket Launcher",
         "Offset": "0x38"
       },
       {
@@ -36,11 +36,11 @@
         "Offset": "0x40"
       },
       {
-        "Name": "Giant squid",
+        "Name": "Giant Squid",
         "Offset": "0x60"
       },
       {
-        "Name": "Kirov airship",
+        "Name": "Kirov Airship",
         "Offset": "0x3c"
       },
       {
@@ -52,7 +52,7 @@
         "Offset": "0x58"
       },
       {
-        "Name": "Typhoon attack submarine",
+        "Name": "Typhoon Attack Submarine",
         "Offset": "0x4c"
       },
       {
@@ -60,17 +60,17 @@
         "Offset": "0x90"
       },
       {
-        "Name": "Amphibious transport",
+        "Name": "Soviet Amphibious Transport",
         "Offset": "0x10"
       },
       {
-        "Name": "Demolition truck",
+        "Name": "Demolition Truck",
         "Offset": "0xa4"
       }
     ],
     "Infantry": [
       {
-        "Name": "Soviet Attack dog",
+        "Name": "Soviet Attack Dog",
         "Offset": "0x24"
       },
       {
@@ -82,7 +82,7 @@
         "Offset": "0x6c"
       },
       {
-        "Name": "Tesla trooper",
+        "Name": "Tesla Trooper",
         "Offset": "0x8"
       },
       {
@@ -107,11 +107,11 @@
   "Allied": {
     "Building": [
       {
-        "Name": "Allied war factory",
+        "Name": "Allied War Factory",
         "Offset": "0x1c"
       },
       {
-        "Name": "Grand cannon",
+        "Name": "Grand Cannon",
         "Offset": "0x100"
       }
     ],
@@ -125,11 +125,11 @@
         "Offset": "0x24"
       },
       {
-        "Name": "Mirage tank",
+        "Name": "Mirage Tank",
         "Offset": "0x94"
       },
       {
-        "Name": "Prism tank",
+        "Name": "Prism Tank",
         "Offset": "0x88"
       },
       {
@@ -137,7 +137,7 @@
         "Offset": "0x0"
       },
       {
-        "Name": "Amphibious transport",
+        "Name": "Allied Amphibious Transport",
         "Offset": "0x54"
       },
       {
@@ -149,19 +149,19 @@
         "Offset": "0x64"
       },
       {
-        "Name": "Aegis cruiser",
+        "Name": "Aegis Cruiser",
         "Offset": "0x50"
       },
       {
-        "Name": "Aircraft carrier",
+        "Name": "Aircraft Carrier",
         "Offset": "0x34"
       },
       {
-        "Name": "NightHawk transport",
+        "Name": "NightHawk Transport",
         "Offset": "0x5c"
       },
       {
-        "Name": "Tank destoyer",
+        "Name": "Tank Destoyer",
         "Offset": "0x6c"
       },
       {
@@ -171,7 +171,7 @@
     ],
     "Infantry": [
       {
-        "Name": "Allied Attack dog",
+        "Name": "Allied Attack Dog",
         "Offset": "0x70"
       },
       {
@@ -183,7 +183,7 @@
         "Offset": "0xc"
       },
       {
-        "Name": "Chrono legionnaire",
+        "Name": "Chrono Legionnaire",
         "Offset": "0x3c"
       },
       {

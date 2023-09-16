@@ -8,6 +8,8 @@
 
 #include <Windows.h>
 
+#include "json.hpp"
+
 #define MAXPLAYER 8
 #define INVALIDCLASS 0xffffffffu
 
@@ -31,6 +33,8 @@
 
 #define UNITSAFE 4096
 
+using json = nlohmann::json;
+
 class Ra2ob {
 
 public:
@@ -39,6 +43,22 @@ public:
 
     enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
     enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
+    enum class ViewType : int { Auto = 0, Manual = 1, ManualNoZero = 2 };
+
+    class View {
+
+    public:
+        View(std::string jsonFile = "../view_n.json");
+        ~View();
+
+        void loadFromJson(std::string jsonFile);
+        void refreshView(std::string key, std::string value, int index);
+        void sortView();
+        std::string viewToString();
+
+        json m_numericView, m_unitView, m_order;
+        ViewType m_viewType;
+    };
 
     class DataBase {
 
@@ -149,7 +169,8 @@ public:
     void initDatas();
     bool initAddrs();
     int hasPlayer();
-    bool showInfo();
+    bool refreshInfo();
+    void exportInfo();
     int getHandle();
     uint32_t getAddr(uint32_t offset);
 
@@ -158,6 +179,7 @@ public:
     Units _units;
     StrName _strName;
     StrCountry _strCountry;
+    View _view;
 
     std::vector<std::string> _views;
 
@@ -170,8 +192,6 @@ public:
     std::vector<uint32_t> _houseTypes;
 
     static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
-
 };
-
  
 #endif

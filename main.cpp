@@ -12,10 +12,12 @@ int main() {
                 while (true) {
                     std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
 
-                    if (!g.showInfo()) {
+                    if (!g.refreshInfo()) {
                         system("cls");
                         break;
                     }
+
+                    g.exportInfo();
 
                     std::cout << std::endl;
 

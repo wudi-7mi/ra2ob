@@ -1,4 +1,6 @@
 #include <iostream>
+#include <string>
+#include <sstream>
 #include <vector>
 #include <fstream>
 #include <memory>
@@ -7,7 +9,6 @@
 #include <locale>
 #include <codecvt>
 
-#include "json.hpp"
 #include "ra2ob.hpp"
 
 using json = nlohmann::json;
@@ -16,6 +17,7 @@ Ra2ob::Ra2ob() {
     _pHandle = nullptr;
     _strName = StrName();
     _strCountry = StrCountry();
+    _view = View();
 
     _players        = std::vector<bool>(MAXPLAYER, false);
     _playerBases    = std::vector<uint32_t>(MAXPLAYER, 0);
@@ -30,6 +32,86 @@ Ra2ob::~Ra2ob() {
     if (_pHandle != nullptr) {
         CloseHandle(_pHandle);
     }
+}
+
+Ra2ob::View::View(std::string jsonFile) {
+    loadFromJson(jsonFile);
+}
+
+Ra2ob::View::~View() {}
+
+void Ra2ob::View::loadFromJson(std::string jsonFile) {
+    std::vector<std::string> ret;
+    std::ifstream f(jsonFile);
+    json data = json::parse(f);
+
+    m_viewType = ViewType(data["ViewType"]);
+
+    for (std::string it : data["NumericItems"]) {
+        json jsonArray = json::array();
+
+        for (int i = 0; i < MAXPLAYER; i++) {
+            jsonArray.push_back("0");
+        }
+        m_numericView[it] = jsonArray;
+    }
+
+    for (auto& it : data["UnitItems"]["DefaultView"]) {
+        std::string key = it["Name"];
+        //int index = it["Index"];
+        json jsonArray = json::array();
+
+        for (int i = 0; i < MAXPLAYER; i++) {
+            jsonArray.push_back("0");
+        }
+
+        m_unitView[key] = jsonArray;
+        //m_order[key] = index;
+    }
+}
+
+void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
+    if (m_numericView.contains(key)) {
+        m_numericView[key][index] = value;
+    }
+    else if (m_unitView.contains(key)) {
+        m_unitView[key][index] = value;
+    }
+}
+
+void Ra2ob::View::sortView() {}
+
+std::string Ra2ob::View::viewToString() {
+    std::stringstream ss;
+    
+    sortView();
+
+    for (int i = 0; i < MAXPLAYER; i++) {
+
+        ss << std::endl;
+
+        for (auto& it : m_numericView.items()) {
+            auto v = it.value();
+            if (v[i] != "0" && v[i] != "") {
+                ss << it.key() << ": " << v[i] << std::endl;
+            }
+        }
+
+        for (auto& it : m_unitView.items()) {
+            auto v = it.value();
+            if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
+                
+                if (v[i] != "0" && v[i] != "") {
+                    ss << it.key() << ": " << v[i] << std::endl;
+                }
+            }
+            else {
+                ss << it.key() << ": " << v[i] << std::endl;
+            }
+        }
+    }
+
+    return ss.str();
 }
 
 Ra2ob::DataBase::DataBase(std::string name, uint32_t offset) {
@@ -361,7 +443,7 @@ int Ra2ob::hasPlayer() {
     return count;
 }
 
-bool Ra2ob::showInfo() {
+bool Ra2ob::refreshInfo() {
     if (!hasPlayer()) {
         std::cerr << "No valid player to show info." << std::endl;
         return false;
@@ -389,6 +471,10 @@ bool Ra2ob::showInfo() {
     _strName.fetchData(_pHandle, _playerBases);
     _strCountry.fetchData(_pHandle, _houseTypes);
 
+    return true;
+}
+
+void Ra2ob::exportInfo() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
@@ -398,21 +484,25 @@ bool Ra2ob::showInfo() {
             continue;
         }
 
-        std::cout << _strName.getName() << ": " << _strName.getValueByIndex(i) << std::endl;
-        std::cout << _strCountry.getName() << ": " << _strCountry.getValueByIndex(i) << std::endl;
+        _view.refreshView(_strName.getName(), _strName.getValueByIndex(i), i);
+        _view.refreshView(_strCountry.getName(), _strCountry.getValueByIndex(i), i);
         for (auto& it : _numerics) {
-            if (std::find(_views.begin(), _views.end(), it.getName()) != _views.end()) {
-                std::cout << it.getName() << ": " << it.getValueByIndex(i) << std::endl;
+            if (_view.m_numericView.find(it.getName()) != _view.m_numericView.end()) {
+                _view.refreshView(it.getName(), std::to_string(it.getValueByIndex(i)), i);                
             }
         }
         for (auto& it : _units) {
-            if (std::find(_views.begin(), _views.end(), it.getName()) != _views.end()) {
-                std::cout << it.getName() << ": " << it.getValueByIndex(i) << std::endl;
+            if (_view.m_unitView.find(it.getName()) != _view.m_unitView.end()) {
+                int unitNum = it.getValueByIndex(i);
+
+                if (unitNum < UNITSAFE) {
+                    _view.refreshView(it.getName(), std::to_string(unitNum), i);
+                }
             }
         }
     }
 
-    return true;
+    std::cout << _view.viewToString() << std::endl;
 }
 
 int Ra2ob::getHandle() {

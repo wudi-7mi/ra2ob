@@ -4,15 +4,15 @@
     "Offset": "0x30c"
   },
   {
-    "Name": "Credit spent",
+    "Name": "Credit Spent",
     "Offset": "0x2dc"
   },
   {
-    "Name": "Power output",
+    "Name": "Power Output",
     "Offset": "0x53a4"
   },
   {
-    "Name": "Power drain",
+    "Name": "Power Drain",
     "Offset": "0x53a8"
   }
 ]
