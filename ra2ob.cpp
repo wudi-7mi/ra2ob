@@ -87,8 +87,8 @@ Ra2ob::Numeric::~Numeric() {}
 Ra2ob::Unit::Unit(
     std::string name,
     uint32_t offset,
-    Unit::factionType ft,
-    Unit::unitType ut
+    FactionType ft,
+    UnitType ut
 ) : Ra2ob::DataBase(name, offset) {
     m_factionType = ft;
     m_unitType = ut;
@@ -96,11 +96,11 @@ Ra2ob::Unit::Unit(
 
 Ra2ob::Unit::~Unit() {}
 
-Ra2ob::Unit::factionType Ra2ob::Unit::getFactionType() {
+Ra2ob::FactionType Ra2ob::Unit::getFactionType() {
     return m_factionType;
 }
 
-Ra2ob::Unit::unitType Ra2ob::Unit::getUnitType() {
+Ra2ob::UnitType Ra2ob::Unit::getUnitType() {
     return m_unitType;
 }
 
@@ -235,37 +235,35 @@ Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
     json data = json::parse(f);
 
     for (auto& ft : data.items()) {
-
-        Unit::factionType s_ft;
+        FactionType s_ft;
 
         if (ft.key() == "Soviet") {
-            s_ft = Unit::Soviet;
+            s_ft = FactionType::Soviet;
         }
         else if (ft.key() == "Allied") {
-            s_ft = Unit::Allied;
+            s_ft = FactionType::Allied;
         }
         else {
-            s_ft = Unit::UnknownFaction;
+            s_ft = FactionType::Unknown;
         }
 
         for (auto& ut : data[ft.key()].items()) {
-
-            Unit::unitType s_ut;
+            UnitType s_ut;
 
             if (ut.key() == "Building") {
-                s_ut = Unit::Building;
+                s_ut = UnitType::Building;
             }
             else if (ut.key() == "Tank") {
-                s_ut = Unit::Tank;
+                s_ut = UnitType::Tank;
             }
             else if (ut.key() == "Infantry") {
-                s_ut = Unit::Infantry;
+                s_ut = UnitType::Infantry;
             }
             else if (ut.key() == "Aircraft") {
-                s_ut = Unit::Aircraft;
+                s_ut = UnitType::Aircraft;
             }
             else {
-                s_ut = Unit::UnknownUnit;
+                s_ut = UnitType::Unknown;
             }
 
             for (auto& u : data[ft.key()][ut.key()]) {
@@ -287,7 +285,6 @@ Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
 
 std::vector<std::string> Ra2ob::loadViewsFromJson(std::string filePath) {
     std::vector<std::string> ret;
-
     std::ifstream f(filePath);
     json data = json::parse(f);
 
@@ -326,13 +323,13 @@ bool Ra2ob::initAddrs() {
         if (playerBase != INVALIDCLASS) {
             uint32_t realPlayerBase = getAddr(playerBase * 4 + classBaseArray);
 
-            _players[i] = true;
+            _players[i]     = true;
             _playerBases[i] = realPlayerBase;
-            _buildings[i] = getAddr(realPlayerBase + BUILDINGOFFSET);
-            _tanks[i] = getAddr(realPlayerBase + TANKOFFSET);
-            _infantrys[i] = getAddr(realPlayerBase + INFANTRYOFFSET);
-            _aircrafts[i] = getAddr(realPlayerBase + AIRCRAFTOFFSET);
-            _houseTypes[i] = getAddr(realPlayerBase + HOUSETYPEOFFSET);
+            _buildings[i]   = getAddr(realPlayerBase + BUILDINGOFFSET);
+            _tanks[i]       = getAddr(realPlayerBase + TANKOFFSET);
+            _infantrys[i]   = getAddr(realPlayerBase + INFANTRYOFFSET);
+            _aircrafts[i]   = getAddr(realPlayerBase + AIRCRAFTOFFSET);
+            _houseTypes[i]  = getAddr(realPlayerBase + HOUSETYPEOFFSET);
 
             if (
                 _buildings[i]   == 1 &&
@@ -375,13 +372,13 @@ bool Ra2ob::showInfo() {
     }
 
     for (auto& it : _units) {
-        if (it.getUnitType() == Unit::Building) {
+        if (it.getUnitType() == UnitType::Building) {
             it.fetchData(_pHandle, _buildings);
         }
-        else if (it.getUnitType() == Unit::Infantry) {
+        else if (it.getUnitType() == UnitType::Infantry) {
             it.fetchData(_pHandle, _infantrys);
         }
-        else if (it.getUnitType() == Unit::Tank) {
+        else if (it.getUnitType() == UnitType::Tank) {
             it.fetchData(_pHandle, _tanks);
         }
         else {
@@ -475,7 +472,6 @@ uint32_t Ra2ob::getAddr(uint32_t offset) {
     uint32_t buf = 0;
 
     if (!readMemory(_pHandle, offset, &buf, 4)) {
-        std::cerr << "Error: Cannot get address." << std::endl;
         return 1;
     }
 

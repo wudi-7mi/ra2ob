@@ -10,17 +10,20 @@ int main() {
         if (g.getHandle() == 0) {
             if (g.initAddrs()) {
                 while (true) {
+                    std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
+
                     if (!g.showInfo()) {
                         system("cls");
                         break;
                     }
+
+                    std::cout << std::endl;
 
                     if (!g.initAddrs()) {
                         system("cls");
                         break;
                     }
 
-                    std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
 
                     Sleep(500);
                     system("cls");

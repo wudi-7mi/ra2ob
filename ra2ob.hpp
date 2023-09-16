@@ -37,6 +37,9 @@ public:
     Ra2ob();
     ~Ra2ob();
 
+    enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
+    enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
+
     class DataBase {
 
     public:
@@ -68,23 +71,21 @@ public:
     class Unit : public DataBase {
 
     public:
-        enum factionType { Soviet, Allied, UnknownFaction };
-        enum unitType { Building, Tank, Infantry, Aircraft, UnknownUnit };
 
         Unit(
             std::string name,
             uint32_t offset,
-            Unit::factionType ft,
-            Unit::unitType ut
+            FactionType ft,
+            UnitType ut
         );
         ~Unit();
 
-        factionType getFactionType();
-        unitType getUnitType();
+        FactionType getFactionType();
+        UnitType getUnitType();
 
     protected:
-        factionType m_factionType;
-        unitType m_unitType;
+        FactionType m_factionType;
+        UnitType m_unitType;
     };
 
 
@@ -113,14 +114,14 @@ public:
     
     protected:
         std::map<std::string, std::string> m_countryMap = {
-            {"Americans", "Americans"},
-            {"Alliance", "Korea"},
-            {"French", "French"},
-            {"Germans", "Germans"},
-            {"British", "British"},
-            {"Africans", "Libya"},
-            {"Arabs", "Iraq"},
-            {"Russians", "Russians"}
+            { "Americans"   , "Americans"   },
+            { "Alliance"    , "Korea"       },
+            { "French"      , "French"      },
+            { "Germans"     , "Germans"     },
+            { "British"     , "British"     },
+            { "Africans"    , "Libya"       },
+            { "Arabs"       , "Iraq"        },
+            { "Russians"    , "Russians"    }
         };
     };
 
@@ -151,7 +152,6 @@ public:
     bool showInfo();
     int getHandle();
     uint32_t getAddr(uint32_t offset);
-    bool gameCheck();
 
     HANDLE _pHandle;
     Numerics _numerics;
