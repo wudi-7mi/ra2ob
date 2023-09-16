@@ -3,25 +3,30 @@
 
 int main() {
     while (true) {
-        Game g = Game();
+        Ra2ob g = Ra2ob();
 
         g.initDatas();
+
         if (g.getHandle() == 0) {
-            g.initAddrs();
+            if (g.initAddrs()) {
+                while (true) {
+                    if (!g.showInfo()) {
+                        system("cls");
+                        break;
+                    }
 
-            std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
+                    if (!g.initAddrs()) {
+                        system("cls");
+                        break;
+                    }
 
-            while (true) {
-                g.initAddrs();
-                std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
-                g.showInfo();
-                Sleep(500);
-                system("cls");
+                    std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
 
-                if (g.getHandle() != 0) {
-                    break;
+                    Sleep(500);
+                    system("cls");
                 }
             }
+
         }
         Sleep(1000);
     }

@@ -1,36 +1,57 @@
 #include <iostream>
 #include <vector>
-#include "json.hpp"
 #include <fstream>
 #include <memory>
 #include <Windows.h>
 #include <TlHelp32.h>   //for PROCESSENTRY32, needs to be included after windows.h
 #include <locale>
 #include <codecvt>
+
+#include "json.hpp"
 #include "ra2ob.hpp"
 
 using json = nlohmann::json;
 
-Game::Game() {}
+Ra2ob::Ra2ob() {
+    _pHandle = nullptr;
+    _strName = StrName();
+    _strCountry = StrCountry();
 
-Game::DataBase::DataBase(std::string name, uint32_t offset) {
+    _players        = std::vector<bool>(MAXPLAYER, false);
+    _playerBases    = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildings      = std::vector<uint32_t>(MAXPLAYER, 0);
+    _infantrys      = std::vector<uint32_t>(MAXPLAYER, 0);
+    _tanks          = std::vector<uint32_t>(MAXPLAYER, 0);
+    _aircrafts      = std::vector<uint32_t>(MAXPLAYER, 0);
+    _houseTypes     = std::vector<uint32_t>(MAXPLAYER, 0);
+}
+
+Ra2ob::~Ra2ob() {
+    if (_pHandle != nullptr) {
+        CloseHandle(_pHandle);
+    }
+}
+
+Ra2ob::DataBase::DataBase(std::string name, uint32_t offset) {
     m_name = name;
     m_offset = offset;
     m_value = std::vector<uint32_t>(MAXPLAYER, 0);
     m_size = NUMSIZE;
-};
+}
 
-void Game::DataBase::showInfo() {
+Ra2ob::DataBase::~DataBase() {}
+
+void Ra2ob::DataBase::showInfo() {
     std::cout << "Data name: " << m_name << std::endl;
     std::cout << "Offset: 0x" << std::hex << m_offset << std::endl;
     std::cout << "Size: " << m_size << std::endl;
 }
 
-std::string Game::DataBase::getName() {
+std::string Ra2ob::DataBase::getName() {
     return m_name;
 }
 
-uint32_t Game::DataBase::getValueByIndex(int index) {
+uint32_t Ra2ob::DataBase::getValueByIndex(int index) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
         return -1;
@@ -38,60 +59,60 @@ uint32_t Game::DataBase::getValueByIndex(int index) {
     return m_value[index];
 }
 
-void Game::DataBase::setValueByIndex(int index, uint32_t value) {
+void Ra2ob::DataBase::setValueByIndex(int index, uint32_t value) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
     }
     m_value[index] = value;
 }
 
-void Game::DataBase::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets) {
+void Ra2ob::DataBase::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
         }
 
-        uint32_t buf;
+        uint32_t buf = 0;
 
-        ReadProcessMemory(
-            pHandle,
-            reinterpret_cast<const void*>(baseOffsets[i] + m_offset),
-            &buf,
-            m_size,
-            nullptr
-        );
+        readMemory(pHandle, baseOffsets[i] + m_offset, &buf, m_size);
         m_value[i] = buf;
     }
 }
 
-Game::Numeric::Numeric(std::string name, uint32_t offset)
+Ra2ob::Numeric::Numeric(std::string name, uint32_t offset)
     : DataBase(name, offset) {}
 
-Game::Unit::Unit(
+Ra2ob::Numeric::~Numeric() {}
+
+Ra2ob::Unit::Unit(
     std::string name,
     uint32_t offset,
     Unit::factionType ft,
     Unit::unitType ut
-) : Game::DataBase(name, offset) {
+) : Ra2ob::DataBase(name, offset) {
     m_factionType = ft;
     m_unitType = ut;
 }
 
-Game::Unit::factionType Game::Unit::getFactionType() {
+Ra2ob::Unit::~Unit() {}
+
+Ra2ob::Unit::factionType Ra2ob::Unit::getFactionType() {
     return m_factionType;
 }
 
-Game::Unit::unitType Game::Unit::getUnitType() {
+Ra2ob::Unit::unitType Ra2ob::Unit::getUnitType() {
     return m_unitType;
 }
 
-Game::StrName::StrName(std::string name, uint32_t offset)
-    : Game::DataBase(name, offset) {
+Ra2ob::StrName::StrName(std::string name, uint32_t offset)
+    : Ra2ob::DataBase(name, offset) {
     m_value = std::vector<std::string>(MAXPLAYER, "");
     m_size = STRNAMESIZE;
 }
 
-void Game::StrName::fetchData(
+Ra2ob::StrName::~StrName() {}
+
+void Ra2ob::StrName::fetchData(
     HANDLE pHandle,
     std::vector<uint32_t> baseOffsets
 ) {
@@ -100,21 +121,15 @@ void Game::StrName::fetchData(
             continue;
         }
 
-        wchar_t buf[STRNAMESIZE];
+        wchar_t buf[STRNAMESIZE] = L"";
 
-        ReadProcessMemory(
-            pHandle,
-            reinterpret_cast<const void*>(baseOffsets[i] + m_offset),
-            &buf,
-            m_size,
-            nullptr
-        );
+        readMemory(pHandle, baseOffsets[i] + m_offset, &buf, m_size);
         std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
         m_value[i] = convert.to_bytes(buf);
     }
 }
 
-std::string Game::StrName::getValueByIndex(int index) {
+std::string Ra2ob::StrName::getValueByIndex(int index) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
         return "";
@@ -122,19 +137,21 @@ std::string Game::StrName::getValueByIndex(int index) {
     return m_value[index];
 }
 
-void Game::StrName::setValueByIndex(int index, std::string value) {
+void Ra2ob::StrName::setValueByIndex(int index, std::string value) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
     }
     m_value[index] = value;
 }
 
-Game::StrCountry::StrCountry(std::string name, uint32_t offset)
+Ra2ob::StrCountry::StrCountry(std::string name, uint32_t offset)
     : StrName(name, offset) {
     m_size = STRCOUNTRYSIZE;
 }
 
-void Game::StrCountry::fetchData(
+Ra2ob::StrCountry::~StrCountry() {}
+
+void Ra2ob::StrCountry::fetchData(
     HANDLE pHandle,
     std::vector<uint32_t> baseOffsets
 ) {
@@ -143,27 +160,28 @@ void Game::StrCountry::fetchData(
             continue;
         }
 
-        char buf[STRCOUNTRYSIZE];
+        char buf[STRCOUNTRYSIZE] = "\0";
 
-        ReadProcessMemory(
-            pHandle,
-            reinterpret_cast<const void*>(baseOffsets[i] + m_offset),
-            &buf,
-            m_size,
-            nullptr
-        );
-        std::string res = buf;
-        m_value[i] = m_countryMap[res];
+        readMemory(pHandle, baseOffsets[i] + m_offset, &buf, m_size);
+
+        if (m_countryMap.find(buf) == m_countryMap.end()) {
+            m_value[i] = "";
+        }
+        else {
+            m_value[i] = m_countryMap[buf];
+        }
     }
 }
 
-Game::WinOrLose::WinOrLose(std::string name, uint32_t offset)
-    : Game::DataBase(name, offset) {
+Ra2ob::WinOrLose::WinOrLose(std::string name, uint32_t offset)
+    : Ra2ob::DataBase(name, offset) {
     m_value = std::vector<bool>(MAXPLAYER, false);
     m_size = BOOLSIZE;
 }
 
-void Game::WinOrLose::fetchData(
+Ra2ob::WinOrLose::~WinOrLose() {}
+
+void Ra2ob::WinOrLose::fetchData(
     HANDLE pHandle,
     std::vector<uint32_t> baseOffsets
 ) {
@@ -172,20 +190,14 @@ void Game::WinOrLose::fetchData(
             continue;
         }
 
-        bool buf;
+        bool buf = false;
 
-        ReadProcessMemory(
-            pHandle,
-            reinterpret_cast<const void*>(baseOffsets[i] + m_offset),
-            &buf,
-            m_size,
-            nullptr
-        );
+        readMemory(pHandle, baseOffsets[i] + m_offset, &buf, m_size);
         m_value[i] = buf;
     }
 }
 
-bool Game::WinOrLose::getValueByIndex(int index) {
+bool Ra2ob::WinOrLose::getValueByIndex(int index) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be bigger than MAXPLAYER." << std::endl;
         return false;
@@ -193,14 +205,14 @@ bool Game::WinOrLose::getValueByIndex(int index) {
     return m_value[index];
 }
 
-void Game::WinOrLose::setValueByIndex(int index, bool value) {
+void Ra2ob::WinOrLose::setValueByIndex(int index, bool value) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be bigger than MAXPLAYER." << std::endl;
     }
     m_value[index] = value;
 }
 
-Game::Numerics Game::loadNumericsFromJson(std::string filePath) {
+Ra2ob::Numerics Ra2ob::loadNumericsFromJson(std::string filePath) {
     Numerics numerics;
 
     std::ifstream f(filePath);
@@ -216,7 +228,7 @@ Game::Numerics Game::loadNumericsFromJson(std::string filePath) {
     return numerics;
 }
 
-Game::Units Game::loadUnitsFromJson(std::string filePath) {
+Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
     Units units;
 
     std::ifstream f(filePath);
@@ -273,7 +285,7 @@ Game::Units Game::loadUnitsFromJson(std::string filePath) {
     return units;
 }
 
-std::vector<std::string> Game::loadViewsFromJson(std::string filePath) {
+std::vector<std::string> Ra2ob::loadViewsFromJson(std::string filePath) {
     std::vector<std::string> ret;
 
     std::ifstream f(filePath);
@@ -286,24 +298,30 @@ std::vector<std::string> Game::loadViewsFromJson(std::string filePath) {
     return ret;
 }
 
-void Game::initDatas() {
+void Ra2ob::initDatas() {
     _numerics = loadNumericsFromJson();
     _units = loadUnitsFromJson();
     _views = loadViewsFromJson();
 }
 
-void Game::initAddrs() {
+bool Ra2ob::initAddrs() {
     if (NULL == _pHandle) {
         std::cerr << "No valid process handle, call Game::getHandle() first." << std::endl;
-        return;
+        return false;
     }
 
     uint32_t fixed = getAddr(FIXEDOFFSET);
     uint32_t classBaseArray = getAddr(CLASSBASEARRAYOFFSET);
     uint32_t playerBaseArrayPtr = fixed + PLAYERBASEARRAYPTROFFSET;
 
+    if (playerBaseArrayPtr == 1) {
+        return false;
+    }
+
     for (int i = 0; i < MAXPLAYER; i++, playerBaseArrayPtr += 4) {
         uint32_t playerBase = getAddr(playerBaseArrayPtr);
+
+        _players[i] = false;
 
         if (playerBase != INVALIDCLASS) {
             uint32_t realPlayerBase = getAddr(playerBase * 4 + classBaseArray);
@@ -315,11 +333,23 @@ void Game::initAddrs() {
             _infantrys[i] = getAddr(realPlayerBase + INFANTRYOFFSET);
             _aircrafts[i] = getAddr(realPlayerBase + AIRCRAFTOFFSET);
             _houseTypes[i] = getAddr(realPlayerBase + HOUSETYPEOFFSET);
+
+            if (
+                _buildings[i]   == 1 &&
+                _tanks[i]       == 1 &&
+                _infantrys[i]   == 1 &&
+                _aircrafts[i]   == 1 &&
+                _houseTypes[i]  == 1
+            ) {
+                return false;
+            }
         }
     }
+
+    return true;
 }
 
-int Game::hasPlayer() {
+int Ra2ob::hasPlayer() {
     int count = 0;
     
     for (auto& it : _players) {
@@ -334,10 +364,10 @@ int Game::hasPlayer() {
     return count;
 }
 
-void Game::showInfo() {
+bool Ra2ob::showInfo() {
     if (!hasPlayer()) {
         std::cerr << "No valid player to show info." << std::endl;
-        return;
+        return false;
     }
 
     for (auto& it : _numerics) {
@@ -366,6 +396,11 @@ void Game::showInfo() {
         if (!_players[i]) {
             continue;
         }
+
+        if (_strCountry.getValueByIndex(i) == "") {
+            continue;
+        }
+
         std::cout << _strName.getName() << ": " << _strName.getValueByIndex(i) << std::endl;
         std::cout << _strCountry.getName() << ": " << _strCountry.getValueByIndex(i) << std::endl;
         for (auto& it : _numerics) {
@@ -378,22 +413,15 @@ void Game::showInfo() {
                 std::cout << it.getName() << ": " << it.getValueByIndex(i) << std::endl;
             }
         }
-
     }
+
+    return true;
 }
 
-void Game::showNames() {
-    for (auto& it : _numerics) {
-        std::cout << it.getName() << std::endl;
-    }
-    for (auto& it : _units) {
-        std::cout << it.getName() << std::endl;
-    }
-    std::cout << _strName.getName() << std::endl;
-}
-
-int Game::getHandle() {
+int Ra2ob::getHandle() {
     DWORD pid = 0;
+    // Use this if something goes wrong here.
+    //std::wstring name = L"gamemd-spawn.exe";
     std::string name = "gamemd-spawn.exe";
 
     std::unique_ptr<void, decltype(&CloseHandle)> h(
@@ -410,6 +438,8 @@ int Game::getHandle() {
     processInfo.dwSize = sizeof(PROCESSENTRY32);
 
     for (BOOL success = Process32First(h.get(), &processInfo); success; success = Process32Next(h.get(), &processInfo)) {
+        // Use this if something goes wrong here.
+        //if (wcscmp(processInfo.szExeFile, name.c_str() == 0) {
         if (name == processInfo.szExeFile) {
             pid = processInfo.th32ProcessID;
             std::cout << "PID Found: " << pid << std::endl;
@@ -441,15 +471,17 @@ int Game::getHandle() {
     return 0;
 }
 
-uint32_t Game::getAddr(uint32_t offset) {
-    uint32_t buf;
-    ReadProcessMemory(
-        _pHandle,
-        reinterpret_cast<const void*>(offset),
-        &buf,
-        4,
-        nullptr
-    );
+uint32_t Ra2ob::getAddr(uint32_t offset) {
+    uint32_t buf = 0;
+
+    if (!readMemory(_pHandle, offset, &buf, 4)) {
+        std::cerr << "Error: Cannot get address." << std::endl;
+        return 1;
+    }
 
     return buf;
+}
+
+bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size) {
+    return ReadProcessMemory(handle, (const void*)addr, value, size, nullptr);
 }

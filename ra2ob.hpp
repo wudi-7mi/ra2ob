@@ -31,15 +31,17 @@
 
 #define UNITSAFE 4096
 
-class Game {
+class Ra2ob {
 
 public:
-    Game();
+    Ra2ob();
+    ~Ra2ob();
 
     class DataBase {
 
     public:
         DataBase(std::string name, uint32_t offset);
+        virtual ~DataBase();
 
         void showInfo();
         std::string getName();
@@ -59,6 +61,7 @@ public:
 
     public:
         Numeric(std::string name, uint32_t offset);
+        ~Numeric();
     };
 
 
@@ -74,6 +77,7 @@ public:
             Unit::factionType ft,
             Unit::unitType ut
         );
+        ~Unit();
 
         factionType getFactionType();
         unitType getUnitType();
@@ -87,7 +91,8 @@ public:
     class StrName : public DataBase {
 
     public:
-        StrName(std::string name, uint32_t offset);
+        StrName(std::string name = "Player Name", uint32_t offset = STRNAMEOFFSET);
+        ~StrName();
 
         void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets);
         std::string getValueByIndex(int index);
@@ -101,7 +106,8 @@ public:
     class StrCountry : public StrName {
 
     public:
-        StrCountry(std::string name, uint32_t offset);
+        StrCountry(std::string name = "Country", uint32_t offset = STRCOUNTRYOFFSET);
+        ~StrCountry();
 
         void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets);
     
@@ -123,6 +129,7 @@ public:
 
     public:
         WinOrLose(std::string name, uint32_t offset);
+        ~WinOrLose();
 
         void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets);
         bool getValueByIndex(int index);
@@ -139,27 +146,31 @@ public:
     Units loadUnitsFromJson(std::string filePath = "../unit_offsets.json");
     std::vector<std::string> loadViewsFromJson(std::string filePath = "../view.json");
     void initDatas();
-    void initAddrs();
+    bool initAddrs();
     int hasPlayer();
-    void showInfo();
-    void showNames();
+    bool showInfo();
     int getHandle();
     uint32_t getAddr(uint32_t offset);
+    bool gameCheck();
 
     HANDLE _pHandle;
     Numerics _numerics;
     Units _units;
-    StrName _strName = StrName("Player Name", STRNAMEOFFSET);
-    StrCountry _strCountry = StrCountry("Country", STRCOUNTRYOFFSET);
+    StrName _strName;
+    StrCountry _strCountry;
 
-    std::vector<bool> _players = std::vector<bool>(MAXPLAYER, false);
     std::vector<std::string> _views;
-    std::vector<uint32_t> _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
-    std::vector<uint32_t> _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
-    std::vector<uint32_t> _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
-    std::vector<uint32_t> _tanks = std::vector<uint32_t>(MAXPLAYER, 0);
-    std::vector<uint32_t> _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
-    std::vector<uint32_t> _houseTypes = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    std::vector<bool> _players;
+    std::vector<uint32_t> _playerBases;
+    std::vector<uint32_t> _buildings;
+    std::vector<uint32_t> _infantrys;
+    std::vector<uint32_t> _tanks;
+    std::vector<uint32_t> _aircrafts;
+    std::vector<uint32_t> _houseTypes;
+
+    static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
+
 };
 
  
