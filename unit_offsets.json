@@ -4,6 +4,14 @@
       {
         "Name": "Soviet War Factory",
         "Offset": "0x38"
+      },
+      {
+        "Name": "Soviet Barracks",
+        "Offset": "0x2c"
+      },
+      {
+        "Name": "Soviet Naval Shipyard",
+        "Offset": "0xf4"
       }
     ],
     "Tank": [
@@ -100,6 +108,10 @@
       {
         "Name": "Terrorist",
         "Offset": "0x68"
+      },
+      {
+        "Name": "Flak Trooper",
+        "Offset": "0x5c"
       }
     ],
     "Aircraft": []
@@ -109,6 +121,14 @@
       {
         "Name": "Allied War Factory",
         "Offset": "0x1c"
+      },
+      {
+        "Name": "Allied Barracks",
+        "Offset": "0xc"
+      },
+      {
+        "Name": "Allied Naval Shipyard",
+        "Offset": "0x5c"
       },
       {
         "Name": "Grand Cannon",

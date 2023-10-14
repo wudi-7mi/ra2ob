@@ -34,3 +34,6 @@
 # Build Folders
 build
 cbuild
+
+# Others
+.vscode

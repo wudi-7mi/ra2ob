@@ -31,6 +31,9 @@
 #define STRNAMEOFFSET 0x1602a
 #define STRCOUNTRYOFFSET 0x24
 
+#define WINOFFSET 0x1f7
+#define LOSEOFFSET 0x1f8
+
 #define UNITSAFE 4096
 
 using json = nlohmann::json;
@@ -38,7 +41,11 @@ using json = nlohmann::json;
 class Ra2ob {
 
 public:
-    Ra2ob();
+    static Ra2ob& getInstance();
+
+    Ra2ob(const Ra2ob&) = delete;
+    void operator=(const Ra2ob&) = delete;
+
     ~Ra2ob();
 
     enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
@@ -134,14 +141,15 @@ public:
     
     protected:
         std::map<std::string, std::string> m_countryMap = {
-            { "Americans"   , "Americans"   },
-            { "Alliance"    , "Korea"       },
-            { "French"      , "French"      },
-            { "Germans"     , "Germans"     },
-            { "British"     , "British"     },
-            { "Africans"    , "Libya"       },
-            { "Arabs"       , "Iraq"        },
-            { "Russians"    , "Russians"    }
+            { "Americans"       , "Americans"   },
+            { "Alliance"        , "Korea"       },
+            { "French"          , "French"      },
+            { "Germans"         , "Germans"     },
+            { "British"         , "British"     },
+            { "Africans"        , "Libya"       },
+            { "Arabs"           , "Iraq"        },
+            { "Russians"        , "Russians"    },
+            { "Confederation"   , "Cuba"        }
         };
     };
 
@@ -162,26 +170,29 @@ public:
 
     using Numerics = std::vector<Numeric>;
     using Units = std::vector<Unit>;
+    using WinOrLoses = std::vector<WinOrLose>;
 
     Numerics loadNumericsFromJson(std::string filePath = "../numeric_offsets.json");
     Units loadUnitsFromJson(std::string filePath = "../unit_offsets.json");
-    std::vector<std::string> loadViewsFromJson(std::string filePath = "../view.json");
+    WinOrLoses initWinOrLose();
     void initDatas();
     bool initAddrs();
     int hasPlayer();
     bool refreshInfo();
-    void exportInfo();
+    void updateView();
     int getHandle();
     uint32_t getAddr(uint32_t offset);
+    FactionType countryToFaction(std::string country);
+    static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
+    void startLoop();
 
     HANDLE _pHandle;
     Numerics _numerics;
     Units _units;
+    WinOrLoses _winOrLoses;
     StrName _strName;
     StrCountry _strCountry;
     View _view;
-
-    std::vector<std::string> _views;
 
     std::vector<bool> _players;
     std::vector<uint32_t> _playerBases;
@@ -190,8 +201,11 @@ public:
     std::vector<uint32_t> _tanks;
     std::vector<uint32_t> _aircrafts;
     std::vector<uint32_t> _houseTypes;
+    std::vector<FactionType> _factionTypes;
 
-    static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
+private:
+    Ra2ob();
+
 };
  
 #endif

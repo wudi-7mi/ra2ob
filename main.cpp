@@ -3,36 +3,12 @@
 
 int main() {
     while (true) {
-        Ra2ob g = Ra2ob();
+        Ra2ob& g = Ra2ob::getInstance();
 
         g.initDatas();
 
-        if (g.getHandle() == 0) {
-            if (g.initAddrs()) {
-                while (true) {
-                    std::cout << "Player numbers: " << g.hasPlayer() << std::endl;
+        g.startLoop();
 
-                    if (!g.refreshInfo()) {
-                        system("cls");
-                        break;
-                    }
-
-                    g.exportInfo();
-
-                    std::cout << std::endl;
-
-                    if (!g.initAddrs()) {
-                        system("cls");
-                        break;
-                    }
-
-
-                    Sleep(500);
-                    system("cls");
-                }
-            }
-
-        }
         Sleep(1000);
     }
 

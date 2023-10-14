@@ -8,10 +8,16 @@
 #include <TlHelp32.h>   //for PROCESSENTRY32, needs to be included after windows.h
 #include <locale>
 #include <codecvt>
+#include <thread>
 
 #include "ra2ob.hpp"
 
 using json = nlohmann::json;
+
+Ra2ob& Ra2ob::getInstance() {
+    static Ra2ob instance;
+    return instance;
+}
 
 Ra2ob::Ra2ob() {
     _pHandle = nullptr;
@@ -26,6 +32,7 @@ Ra2ob::Ra2ob() {
     _tanks          = std::vector<uint32_t>(MAXPLAYER, 0);
     _aircrafts      = std::vector<uint32_t>(MAXPLAYER, 0);
     _houseTypes     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _factionTypes   = std::vector<FactionType>(MAXPLAYER, FactionType::Unknown);
 }
 
 Ra2ob::~Ra2ob() {
@@ -365,14 +372,14 @@ Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
     return units;
 }
 
-std::vector<std::string> Ra2ob::loadViewsFromJson(std::string filePath) {
-    std::vector<std::string> ret;
-    std::ifstream f(filePath);
-    json data = json::parse(f);
+Ra2ob::WinOrLoses Ra2ob::initWinOrLose() {
+    WinOrLoses ret;
 
-    for (auto& v : data) {
-        ret.push_back(v);
-    }
+    WinOrLose w("Win", WINOFFSET);
+    WinOrLose l("Lose", LOSEOFFSET);
+
+    ret.push_back(w);
+    ret.push_back(l);
 
     return ret;
 }
@@ -380,7 +387,7 @@ std::vector<std::string> Ra2ob::loadViewsFromJson(std::string filePath) {
 void Ra2ob::initDatas() {
     _numerics = loadNumericsFromJson();
     _units = loadUnitsFromJson();
-    _views = loadViewsFromJson();
+    _winOrLoses = initWinOrLose();
 }
 
 bool Ra2ob::initAddrs() {
@@ -431,7 +438,7 @@ bool Ra2ob::initAddrs() {
 int Ra2ob::hasPlayer() {
     int count = 0;
     
-    for (auto& it : _players) {
+    for (bool it : _players) {
         if (it) {
             count++;
         }
@@ -468,30 +475,49 @@ bool Ra2ob::refreshInfo() {
         }
     }
 
+    for (auto& it : _winOrLoses) {
+        it.fetchData(_pHandle, _playerBases);
+    }
+
     _strName.fetchData(_pHandle, _playerBases);
     _strCountry.fetchData(_pHandle, _houseTypes);
 
     return true;
 }
 
-void Ra2ob::exportInfo() {
+void Ra2ob::updateView() {
     for (int i = 0; i < MAXPLAYER; i++) {
+
+        // Filter invalid players
         if (!_players[i]) {
             continue;
         }
-
         if (_strCountry.getValueByIndex(i) == "") {
             continue;
         }
 
+        // Refresh Name & Country
         _view.refreshView(_strName.getName(), _strName.getValueByIndex(i), i);
         _view.refreshView(_strCountry.getName(), _strCountry.getValueByIndex(i), i);
+        if (countryToFaction(_strCountry.getValueByIndex(i)) == FactionType::Allied) {
+            _factionTypes[i] = FactionType::Allied;
+        }
+        else {
+            _factionTypes[i] = FactionType::Soviet;
+        }
+        
+        // Refresh numeric values
         for (auto& it : _numerics) {
             if (_view.m_numericView.find(it.getName()) != _view.m_numericView.end()) {
                 _view.refreshView(it.getName(), std::to_string(it.getValueByIndex(i)), i);                
             }
         }
+
+        // Refresh units
         for (auto& it : _units) {
+            if (it.getFactionType() != _factionTypes[i]) {
+                continue;
+            }
             if (_view.m_unitView.find(it.getName()) != _view.m_unitView.end()) {
                 int unitNum = it.getValueByIndex(i);
 
@@ -500,9 +526,21 @@ void Ra2ob::exportInfo() {
                 }
             }
         }
+
+        // Refresh win or lose
+        _view.refreshView("Win Or Lose", "unknown", i);
+        if (_winOrLoses[0].getValueByIndex(i) == true) {
+            _view.refreshView("Win Or Lose", "win", i);
+        }
+        if (_winOrLoses[1].getValueByIndex(i) == true) {
+            _view.refreshView("Win Or Lose", "lose", i);
+        }
     }
 
     std::cout << _view.viewToString() << std::endl;
+    for (auto& it : _tanks) {
+        std::cout << it << std::endl;
+    }
 }
 
 int Ra2ob::getHandle() {
@@ -526,7 +564,7 @@ int Ra2ob::getHandle() {
 
     for (BOOL success = Process32First(h.get(), &processInfo); success; success = Process32Next(h.get(), &processInfo)) {
         // Use this if something goes wrong here.
-        //if (wcscmp(processInfo.szExeFile, name.c_str() == 0) {
+        // if (wcscmp(processInfo.szExeFile, name.c_str()) == 0) {
         if (name == processInfo.szExeFile) {
             pid = processInfo.th32ProcessID;
             std::cout << "PID Found: " << pid << std::endl;
@@ -568,6 +606,47 @@ uint32_t Ra2ob::getAddr(uint32_t offset) {
     return buf;
 }
 
+Ra2ob::FactionType Ra2ob::countryToFaction(std::string country) {
+    if (
+        country == "Americans"  ||
+        country == "Korea"      ||
+        country == "French"     ||
+        country == "Germans"    ||
+        country == "British"
+    ) {
+        return FactionType::Allied;
+    } 
+    return FactionType::Soviet;
+}
+
 bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size) {
     return ReadProcessMemory(handle, (const void*)addr, value, size, nullptr);
+}
+
+void Ra2ob::startLoop() {
+    if (getHandle() == 0) {
+        if (initAddrs()) {
+            while (true) {
+                std::cout << "Player numbers: " << hasPlayer() << std::endl;
+
+                if (!refreshInfo()) {
+                    system("cls");
+                    break;
+                }
+
+                updateView();
+
+                std::cout << std::endl;
+
+                if (!initAddrs()) {
+                    system("cls");
+                    break;
+                }
+
+
+                Sleep(500);
+                system("cls");
+            }
+        }
+    }
 }
