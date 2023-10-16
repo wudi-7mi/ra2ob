@@ -16,9 +16,6 @@ using json = nlohmann::json;
 
 Ra2ob& Ra2ob::getInstance() {
     static Ra2ob instance;
-    instance._strName = StrName();
-    instance._strCountry = StrCountry();
-    instance._view = View();
     return instance;
 }
 
@@ -27,6 +24,8 @@ Ra2ob::Ra2ob() {
     _strName = StrName();
     _strCountry = StrCountry();
     _view = View();
+
+    initDatas();
 
     _players        = std::vector<bool>(MAXPLAYER, false);
     _playerBases    = std::vector<uint32_t>(MAXPLAYER, 0);
@@ -46,7 +45,7 @@ Ra2ob::~Ra2ob() {
 
 Ra2ob::View::View(std::string jsonFile) {
     loadFromJson(jsonFile);
-    m_gameValid = true;
+    m_gameValid = false;
 }
 
 Ra2ob::View::~View() {}
@@ -79,6 +78,13 @@ void Ra2ob::View::loadFromJson(std::string jsonFile) {
         m_unitView[key] = jsonArray;
         //m_order[key] = index;
     }
+
+    json jsonValidPlayer = json::array();
+    for (int i = 0; i < MAXPLAYER; i++) {
+        jsonValidPlayer.push_back(false);
+    }
+    m_validPlayer = jsonValidPlayer;
+
 }
 
 void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
@@ -92,23 +98,16 @@ void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
 
 void Ra2ob::View::sortView() {}
 
-void Ra2ob::View::deactivate() {
-    m_gameValid = false;
-}
-
-bool Ra2ob::View::isActive() {
-    if (m_gameValid) {
-        return true;
-    }
-    return false;
-}
-
 std::string Ra2ob::View::viewToString() {
     std::stringstream ss;
     
     sortView();
 
     for (int i = 0; i < MAXPLAYER; i++) {
+
+        if (!m_validPlayer[i]) {
+            continue;
+        }
 
         ss << std::endl;
 
@@ -407,7 +406,7 @@ void Ra2ob::initDatas() {
 
 bool Ra2ob::initAddrs() {
     if (NULL == _pHandle) {
-        std::cerr << "No valid process handle, call Game::getHandle() first." << std::endl;
+        std::cerr << "No valid process handle, call getHandle() first." << std::endl;
         return false;
     }
 
@@ -500,7 +499,7 @@ bool Ra2ob::refreshInfo() {
     return true;
 }
 
-void Ra2ob::updateView() {
+void Ra2ob::updateView(bool show) {
     for (int i = 0; i < MAXPLAYER; i++) {
 
         // Filter invalid players
@@ -510,6 +509,8 @@ void Ra2ob::updateView() {
         if (_strCountry.getValueByIndex(i) == "") {
             continue;
         }
+
+        _view.m_validPlayer[i] = true;
 
         // Refresh Name & Country
         _view.refreshView(_strName.getName(), _strName.getValueByIndex(i), i);
@@ -552,11 +553,13 @@ void Ra2ob::updateView() {
         }
     }
 
-    std::cout << _view.viewToString() << std::endl;
+    if (show) {
+        std::cout << _view.viewToString();
+    }
 
 }
 
-int Ra2ob::getHandle() {
+int Ra2ob::getHandle(bool show) {
     DWORD pid = 0;
     // Use this if something goes wrong here.
     //std::wstring name = L"gamemd-spawn.exe";
@@ -575,26 +578,32 @@ int Ra2ob::getHandle() {
     PROCESSENTRY32 processInfo {};
     processInfo.dwSize = sizeof(PROCESSENTRY32);
 
-    for (BOOL success = Process32First(h.get(), &processInfo); success; success = Process32Next(h.get(), &processInfo)) {
+    for (BOOL success = Process32First(h.get(), &processInfo);
+            success;
+            success = Process32Next(h.get(), &processInfo)) {
         // Use this if something goes wrong here.
         // if (wcscmp(processInfo.szExeFile, name.c_str()) == 0) {
         if (name == processInfo.szExeFile) {
             pid = processInfo.th32ProcessID;
-            std::cout << "PID Found: " << pid << std::endl;
+            if (show) {
+                std::cout << "PID Found: " << pid << std::endl;
+            }
         }
     }
 
     if (pid == 0) {
-        std::cerr << "No Valid PID. Finding \"gamemd-spawn.exe\"." << std::endl;
+        if (show) {
+            std::cerr << "No Valid PID. Finding \"gamemd-spawn.exe\"." << std::endl;
+        }
         return 1;
     }
 
     HANDLE pHandle = OpenProcess(
-        PROCESS_QUERY_INFORMATION |     // Needed to get a process' token
-        PROCESS_CREATE_THREAD   |     // For obvious reasons
-        PROCESS_VM_OPERATION    |      // Required to perform operations on address space of process (like WriteProcessMemory)
-        PROCESS_VM_READ,            // Required for read data
-        FALSE,                          // Don't inherit pHandle
+        PROCESS_QUERY_INFORMATION |
+        PROCESS_CREATE_THREAD   |
+        PROCESS_VM_OPERATION    |
+        PROCESS_VM_READ,
+        FALSE,
         pid
     );
 
@@ -638,54 +647,86 @@ bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size)
 
 void Ra2ob::close() {
     if (_pHandle != nullptr) {
-        std::cout << "Clear" << std::endl;
         CloseHandle(_pHandle);
     }
+    _strName = StrName();
+    _strCountry = StrCountry();
+    _view = View();
+    initDatas();
+    std::cout << "[Ra2ob]: Handle Closed." << std::endl;
 }
 
-void Ra2ob::refreshTask() {
+void Ra2ob::detectTask(bool show, int interval) {
     while (true) {
 
-        if (!refreshInfo()) {
-            break;
+        if (getHandle(show) == 0) {
+            _gameValid = true;
+            _view.m_gameValid = true;
+            initAddrs();
         }
 
-        if (!initAddrs()) {
-            break;
-        }
-
-        Sleep(500);
+        Sleep(interval);
     }
-    _view.deactivate();
-    close();
 }
 
-void Ra2ob::outputTask() {
+void Ra2ob::fetchTask(int interval) {
     while (true) {
 
-        system("cls");
-        std::cout << "Player numbers: " << hasPlayer() << std::endl;
+        if (_gameValid && _view.m_gameValid) {
+            if (!refreshInfo()) {
+                _gameValid = false;
+            }
 
-        updateView();
-
-        std::cout << std::endl;
-
-        Sleep(500);
-
-        if (!_view.isActive()) {
-            break;
+            if (!initAddrs()) {
+                _gameValid = false;
+            }
+        } else if (_view.m_gameValid) {
+            _view.m_gameValid = false;
+            close();
         }
+
+        Sleep(interval);
+
     }
 }
 
-void Ra2ob::startLoop() {
-    if (getHandle() == 0) {
-        if (initAddrs()) {
-            std::thread w_thread(std::bind(&Ra2ob::refreshTask, this));
-            std::thread r_thread(std::bind(&Ra2ob::outputTask, this));
+void Ra2ob::refreshViewTask(bool show, int interval) {
 
-            w_thread.join();
-            r_thread.join();
+    while (true) {
+
+        if (_gameValid && _view.m_gameValid) {
+            if (show) {
+                system("cls");
+                std::cout << "Player numbers: " << hasPlayer() << std::endl;
+            }
+
+            updateView(show);
+
+            if (show) {
+                std::cout << std::endl;
+            }
         }
+
+        Sleep(interval);
     }
+}
+
+void Ra2ob::startLoop(bool show) {
+
+    std::thread d_thread(std::bind(
+        &Ra2ob::detectTask, this, false, 1000
+    ));
+
+    std::thread f_thread(std::bind(
+        &Ra2ob::fetchTask, this, 500
+    ));
+
+    std::thread r_thread(std::bind(
+        &Ra2ob::refreshViewTask, this, show, 500
+    ));
+
+    d_thread.detach();
+    f_thread.detach();
+    r_thread.detach();
+
 }

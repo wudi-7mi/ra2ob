@@ -63,7 +63,7 @@ public:
         bool isActive();
         std::string viewToString();
 
-        json m_numericView, m_unitView, m_order;
+        json m_numericView, m_unitView, m_order, m_validPlayer;
         bool m_gameValid;
         ViewType m_viewType;
     };
@@ -180,17 +180,19 @@ public:
     bool initAddrs();
     int hasPlayer();
     bool refreshInfo();
-    void updateView();
-    int getHandle();
+    void updateView(bool show = true);
+    int getHandle(bool show = true);
     uint32_t getAddr(uint32_t offset);
     FactionType countryToFaction(std::string country);
     static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
     
     void close();
-    void refreshTask();
-    void outputTask();
-    void startLoop();
+    void detectTask(bool show = true, int interval = 500);
+    void fetchTask(int interval = 500);
+    void refreshViewTask(bool show = true, int interval = 500);
+    void startLoop(bool show = true);
 
+    bool _gameValid;
     HANDLE _pHandle;
     Numerics _numerics;
     Units _units;
