@@ -16,6 +16,9 @@ using json = nlohmann::json;
 
 Ra2ob& Ra2ob::getInstance() {
     static Ra2ob instance;
+    instance._strName = StrName();
+    instance._strCountry = StrCountry();
+    instance._view = View();
     return instance;
 }
 
@@ -43,6 +46,7 @@ Ra2ob::~Ra2ob() {
 
 Ra2ob::View::View(std::string jsonFile) {
     loadFromJson(jsonFile);
+    m_gameValid = true;
 }
 
 Ra2ob::View::~View() {}
@@ -87,6 +91,17 @@ void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
 }
 
 void Ra2ob::View::sortView() {}
+
+void Ra2ob::View::deactivate() {
+    m_gameValid = false;
+}
+
+bool Ra2ob::View::isActive() {
+    if (m_gameValid) {
+        return true;
+    }
+    return false;
+}
 
 std::string Ra2ob::View::viewToString() {
     std::stringstream ss;
@@ -538,9 +553,7 @@ void Ra2ob::updateView() {
     }
 
     std::cout << _view.viewToString() << std::endl;
-    for (auto& it : _tanks) {
-        std::cout << it << std::endl;
-    }
+
 }
 
 int Ra2ob::getHandle() {
@@ -623,30 +636,56 @@ bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size)
     return ReadProcessMemory(handle, (const void*)addr, value, size, nullptr);
 }
 
+void Ra2ob::close() {
+    if (_pHandle != nullptr) {
+        std::cout << "Clear" << std::endl;
+        CloseHandle(_pHandle);
+    }
+}
+
+void Ra2ob::refreshTask() {
+    while (true) {
+
+        if (!refreshInfo()) {
+            break;
+        }
+
+        if (!initAddrs()) {
+            break;
+        }
+
+        Sleep(500);
+    }
+    _view.deactivate();
+    close();
+}
+
+void Ra2ob::outputTask() {
+    while (true) {
+
+        system("cls");
+        std::cout << "Player numbers: " << hasPlayer() << std::endl;
+
+        updateView();
+
+        std::cout << std::endl;
+
+        Sleep(500);
+
+        if (!_view.isActive()) {
+            break;
+        }
+    }
+}
+
 void Ra2ob::startLoop() {
     if (getHandle() == 0) {
         if (initAddrs()) {
-            while (true) {
-                std::cout << "Player numbers: " << hasPlayer() << std::endl;
+            std::thread w_thread(std::bind(&Ra2ob::refreshTask, this));
+            std::thread r_thread(std::bind(&Ra2ob::outputTask, this));
 
-                if (!refreshInfo()) {
-                    system("cls");
-                    break;
-                }
-
-                updateView();
-
-                std::cout << std::endl;
-
-                if (!initAddrs()) {
-                    system("cls");
-                    break;
-                }
-
-
-                Sleep(500);
-                system("cls");
-            }
+            w_thread.join();
+            r_thread.join();
         }
     }
 }

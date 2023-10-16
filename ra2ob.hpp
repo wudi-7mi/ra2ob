@@ -44,9 +44,7 @@ public:
     static Ra2ob& getInstance();
 
     Ra2ob(const Ra2ob&) = delete;
-    void operator=(const Ra2ob&) = delete;
-
-    ~Ra2ob();
+    void operator = (const Ra2ob&) = delete;
 
     enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
     enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
@@ -61,9 +59,12 @@ public:
         void loadFromJson(std::string jsonFile);
         void refreshView(std::string key, std::string value, int index);
         void sortView();
+        void deactivate();
+        bool isActive();
         std::string viewToString();
 
         json m_numericView, m_unitView, m_order;
+        bool m_gameValid;
         ViewType m_viewType;
     };
 
@@ -184,6 +185,10 @@ public:
     uint32_t getAddr(uint32_t offset);
     FactionType countryToFaction(std::string country);
     static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
+    
+    void close();
+    void refreshTask();
+    void outputTask();
     void startLoop();
 
     HANDLE _pHandle;
@@ -205,6 +210,7 @@ public:
 
 private:
     Ra2ob();
+    ~Ra2ob();
 
 };
  
