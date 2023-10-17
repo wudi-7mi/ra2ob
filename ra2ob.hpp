@@ -9,6 +9,7 @@
 #include <Windows.h>
 
 #include "json.hpp"
+#include "spdlog/sinks/rotating_file_sink.h"
 
 #define MAXPLAYER 8
 #define INVALIDCLASS 0xffffffffu
@@ -53,14 +54,12 @@ public:
     class View {
 
     public:
-        View(std::string jsonFile = "../view_n.json");
+        View(std::string jsonFile = "./view_n.json");
         ~View();
 
         void loadFromJson(std::string jsonFile);
         void refreshView(std::string key, std::string value, int index);
         void sortView();
-        void deactivate();
-        bool isActive();
         std::string viewToString();
 
         json m_numericView, m_unitView, m_order, m_validPlayer;
@@ -173,8 +172,8 @@ public:
     using Units = std::vector<Unit>;
     using WinOrLoses = std::vector<WinOrLose>;
 
-    Numerics loadNumericsFromJson(std::string filePath = "../numeric_offsets.json");
-    Units loadUnitsFromJson(std::string filePath = "../unit_offsets.json");
+    Numerics loadNumericsFromJson(std::string filePath = "./numeric_offsets.json");
+    Units loadUnitsFromJson(std::string filePath = "./unit_offsets.json");
     WinOrLoses initWinOrLose();
     void initDatas();
     bool initAddrs();
@@ -185,13 +184,15 @@ public:
     uint32_t getAddr(uint32_t offset);
     FactionType countryToFaction(std::string country);
     static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
-    
+    std::string getTime();
+
     void close();
     void detectTask(bool show = true, int interval = 500);
     void fetchTask(int interval = 500);
     void refreshViewTask(bool show = true, int interval = 500);
     void startLoop(bool show = true);
 
+    std::shared_ptr<spdlog::logger> _logger;
     bool _gameValid;
     HANDLE _pHandle;
     Numerics _numerics;

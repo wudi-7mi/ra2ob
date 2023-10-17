@@ -9,6 +9,7 @@
 #include <locale>
 #include <codecvt>
 #include <thread>
+#include <ctime>
 
 #include "ra2ob.hpp"
 
@@ -20,6 +21,12 @@ Ra2ob& Ra2ob::getInstance() {
 }
 
 Ra2ob::Ra2ob() {
+    std::string logFile = "./logs/" + getTime() + "-log.txt";
+    auto max_size = 1048576 * 5;
+    auto max_files = 2;
+
+    _logger = spdlog::rotating_logger_mt("Ra2ob", logFile, max_size, max_files);
+
     _pHandle = nullptr;
     _strName = StrName();
     _strCountry = StrCountry();
@@ -643,6 +650,21 @@ Ra2ob::FactionType Ra2ob::countryToFaction(std::string country) {
 
 bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size) {
     return ReadProcessMemory(handle, (const void*)addr, value, size, nullptr);
+}
+
+std::string Ra2ob::getTime() {
+    char timeBuffer[15];
+
+    time_t now = time(nullptr);
+    std::strftime(
+        timeBuffer, 
+        sizeof(timeBuffer), 
+        "%Y%m%d%H%M%S", 
+        std::localtime(&now)
+    );
+    std::string timeStr = timeBuffer;
+
+    return timeStr;
 }
 
 void Ra2ob::close() {
