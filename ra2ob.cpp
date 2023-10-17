@@ -105,6 +105,43 @@ void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
 
 void Ra2ob::View::sortView() {}
 
+json Ra2ob::View::viewToJson() {
+    json j;
+
+    sortView();
+
+    for (int i = 0; i < MAXPLAYER; i++) {
+
+        if (!m_validPlayer[i]) {
+            continue;
+        }
+
+        for (auto& it : m_numericView.items()) {
+            auto v = it.value();
+            if (v[i] != "0" && v[i] != "") {
+                j[it.key()] = v[i];
+            }
+        }
+
+        for (auto& it : m_unitView.items()) {
+            auto v = it.value();
+            if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
+
+                if (v[i] != "0" && v[i] != "") {
+                    j[it.key()] = v[i];
+                }
+            }
+            else {
+                j[it.key()] = v[i];
+            }
+        }
+    }
+
+    j["game_running"] = m_gameValid;
+
+    return j;
+}
+
 std::string Ra2ob::View::viewToString() {
     std::stringstream ss;
     
@@ -563,6 +600,7 @@ void Ra2ob::updateView(bool show) {
     if (show) {
         std::cout << _view.viewToString();
     }
+    _logger->info(_view.viewToString());
 
 }
 
@@ -578,6 +616,7 @@ int Ra2ob::getHandle(bool show) {
     );
 
     if (h.get() == INVALID_HANDLE_VALUE) {
+        _logger->error("Failed to create snapshot");
         std::cerr << "Failed to create snapshot" << std::endl;
         return 1;
     }
@@ -595,6 +634,7 @@ int Ra2ob::getHandle(bool show) {
             if (show) {
                 std::cout << "PID Found: " << pid << std::endl;
             }
+            _logger->info("PID Found: {}", pid);
         }
     }
 
@@ -602,6 +642,7 @@ int Ra2ob::getHandle(bool show) {
         if (show) {
             std::cerr << "No Valid PID. Finding \"gamemd-spawn.exe\"." << std::endl;
         }
+        _logger->info("No Valid PID. Finding gamemd-spawn.exe.");
         return 1;
     }
 
@@ -616,7 +657,8 @@ int Ra2ob::getHandle(bool show) {
 
     if (pHandle == NULL)
     {
-        std::cerr << "Could not open process\n" << std::endl;
+        _logger->error("Could not open process");
+        std::cerr << "Could not open process" << std::endl;
         return 1;
     }
 
@@ -675,7 +717,8 @@ void Ra2ob::close() {
     _strCountry = StrCountry();
     _view = View();
     initDatas();
-    std::cout << "[Ra2ob]: Handle Closed." << std::endl;
+    std::cout << "Handle Closed." << std::endl;
+    _logger->info("Handle Closed.");
 }
 
 void Ra2ob::detectTask(bool show, int interval) {
@@ -721,6 +764,7 @@ void Ra2ob::refreshViewTask(bool show, int interval) {
                 system("cls");
                 std::cout << "Player numbers: " << hasPlayer() << std::endl;
             }
+            _logger->info("Player numbers: {}", hasPlayer());
 
             updateView(show);
 

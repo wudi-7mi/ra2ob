@@ -61,6 +61,7 @@ public:
         void refreshView(std::string key, std::string value, int index);
         void sortView();
         std::string viewToString();
+        json viewToJson();
 
         json m_numericView, m_unitView, m_order, m_validPlayer;
         bool m_gameValid;

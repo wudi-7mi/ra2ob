@@ -13,7 +13,8 @@ int main() {
     while (true) {
         Sleep(1000);
 
-        std::cout << g._view.viewToString();
+        //std::cout << g._view.viewToString();
+        std::cout << g._view.viewToJson().dump() << std::endl;
     }
 
     return 0;
