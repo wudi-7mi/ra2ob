@@ -110,7 +110,11 @@ json Ra2ob::View::viewToJson() {
 
     sortView();
 
+    j["player_info"] = json::array();
+
     for (int i = 0; i < MAXPLAYER; i++) {
+
+        json jp;
 
         if (!m_validPlayer[i]) {
             continue;
@@ -119,7 +123,7 @@ json Ra2ob::View::viewToJson() {
         for (auto& it : m_numericView.items()) {
             auto v = it.value();
             if (v[i] != "0" && v[i] != "") {
-                j[it.key()] = v[i];
+                jp[it.key()] = v[i];
             }
         }
 
@@ -128,13 +132,15 @@ json Ra2ob::View::viewToJson() {
             if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
 
                 if (v[i] != "0" && v[i] != "") {
-                    j[it.key()] = v[i];
+                    jp[it.key()] = v[i];
                 }
             }
             else {
-                j[it.key()] = v[i];
+                jp[it.key()] = v[i];
             }
         }
+
+        j["player_info"].emplace_back(jp);
     }
 
     j["game_running"] = m_gameValid;
