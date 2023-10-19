@@ -610,31 +610,60 @@ int Ra2ob::getHandle(bool show) {
     //std::wstring name = L"gamemd-spawn.exe";
     std::string name = "gamemd-spawn.exe";
 
-    std::unique_ptr<void, decltype(&CloseHandle)> h(
-        CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0),
-        &CloseHandle
-    );
+    HANDLE hProcessSnap = INVALID_HANDLE_VALUE;
+    hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 
-    if (h.get() == INVALID_HANDLE_VALUE) {
-        _logger->error("Failed to create snapshot");
-        std::cerr << "Failed to create snapshot" << std::endl;
+    HANDLE hThreadSnap = INVALID_HANDLE_VALUE;
+    hThreadSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+
+    if (hProcessSnap == INVALID_HANDLE_VALUE) {
+        _logger->error("Failed to create process snapshot");
+        std::cerr << "Failed to create process snapshot" << std::endl;
+        return 1;
+    }
+
+    if (hThreadSnap == INVALID_HANDLE_VALUE) {
+        _logger->error("Failed to create thread snapshot");
+        std::cerr << "Failed to create thread snapshot" << std::endl;
         return 1;
     }
 
     PROCESSENTRY32 processInfo {};
     processInfo.dwSize = sizeof(PROCESSENTRY32);
 
-    for (BOOL success = Process32First(h.get(), &processInfo);
+    for (BOOL success = Process32First(hProcessSnap, &processInfo);
             success;
-            success = Process32Next(h.get(), &processInfo)) {
+            success = Process32Next(hProcessSnap, &processInfo)) {
         // Use this if something goes wrong here.
-        // if (wcscmp(processInfo.szExeFile, name.c_str()) == 0) {
+        //if (wcscmp(processInfo.szExeFile, name.c_str()) == 0) {
         if (name == processInfo.szExeFile) {
+
+            THREADENTRY32 threadInfo {};
+            threadInfo.dwSize = sizeof(THREADENTRY32);
+
             pid = processInfo.th32ProcessID;
-            if (show) {
-                std::cout << "PID Found: " << pid << std::endl;
+
+            int thread_nums = 0;
+
+            for (BOOL success = Thread32First(hThreadSnap, &threadInfo);
+                    success;
+                    success = Thread32Next(hThreadSnap, &threadInfo)) {
+                if (threadInfo.th32OwnerProcessID == pid) {
+                    //std::cout << "THREAD ID: " << te32.th32ThreadID;
+                    //std::cout << ", base priority: " << te32.tpBasePri << std::endl;
+                    thread_nums++;
+                }
             }
-            _logger->info("PID Found: {}", pid);
+
+            if (thread_nums != 0) {
+                if (show) {
+                    std::cout << "PID Found: " << pid << std::endl;
+                }
+                _logger->info("PID Found: {}", pid);
+                break;
+            }
+            
+            pid = 0;
         }
     }
 
