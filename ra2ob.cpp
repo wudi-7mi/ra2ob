@@ -185,26 +185,26 @@ std::string Ra2ob::View::viewToString() {
     return ss.str();
 }
 
-Ra2ob::DataBase::DataBase(std::string name, uint32_t offset) {
+Ra2ob::Base::Base(std::string name, uint32_t offset) {
     m_name = name;
     m_offset = offset;
     m_value = std::vector<uint32_t>(MAXPLAYER, 0);
     m_size = NUMSIZE;
 }
 
-Ra2ob::DataBase::~DataBase() {}
+Ra2ob::Base::~Base() {}
 
-void Ra2ob::DataBase::showInfo() {
+void Ra2ob::Base::showInfo() {
     std::cout << "Data name: " << m_name << std::endl;
     std::cout << "Offset: 0x" << std::hex << m_offset << std::endl;
     std::cout << "Size: " << m_size << std::endl;
 }
 
-std::string Ra2ob::DataBase::getName() {
+std::string Ra2ob::Base::getName() {
     return m_name;
 }
 
-uint32_t Ra2ob::DataBase::getValueByIndex(int index) {
+uint32_t Ra2ob::Base::getValueByIndex(int index) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
         return -1;
@@ -212,14 +212,14 @@ uint32_t Ra2ob::DataBase::getValueByIndex(int index) {
     return m_value[index];
 }
 
-void Ra2ob::DataBase::setValueByIndex(int index, uint32_t value) {
+void Ra2ob::Base::setValueByIndex(int index, uint32_t value) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER." << std::endl;
     }
     m_value[index] = value;
 }
 
-void Ra2ob::DataBase::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets) {
+void Ra2ob::Base::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
@@ -233,7 +233,7 @@ void Ra2ob::DataBase::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffset
 }
 
 Ra2ob::Numeric::Numeric(std::string name, uint32_t offset)
-    : DataBase(name, offset) {}
+    : Base(name, offset) {}
 
 Ra2ob::Numeric::~Numeric() {}
 
@@ -242,7 +242,7 @@ Ra2ob::Unit::Unit(
     uint32_t offset,
     FactionType ft,
     UnitType ut
-    ) : Ra2ob::DataBase(name, offset) {
+    ) : Ra2ob::Base(name, offset) {
     m_factionType = ft;
     m_unitType = ut;
 }
@@ -258,7 +258,7 @@ Ra2ob::UnitType Ra2ob::Unit::getUnitType() {
 }
 
 Ra2ob::StrName::StrName(std::string name, uint32_t offset)
-    : Ra2ob::DataBase(name, offset) {
+    : Ra2ob::Base(name, offset) {
     m_value = std::vector<std::string>(MAXPLAYER, "");
     m_size = STRNAMESIZE;
 }
@@ -327,7 +327,7 @@ void Ra2ob::StrCountry::fetchData(
 }
 
 Ra2ob::WinOrLose::WinOrLose(std::string name, uint32_t offset)
-    : Ra2ob::DataBase(name, offset) {
+    : Ra2ob::Base(name, offset) {
     m_value = std::vector<bool>(MAXPLAYER, false);
     m_size = BOOLSIZE;
 }

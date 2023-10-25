@@ -68,11 +68,11 @@ public:
         ViewType m_viewType;
     };
 
-    class DataBase {
+    class Base {
 
     public:
-        DataBase(std::string name, uint32_t offset);
-        virtual ~DataBase();
+        Base(std::string name, uint32_t offset);
+        virtual ~Base();
 
         void showInfo();
         std::string getName();
@@ -88,7 +88,7 @@ public:
     };
 
 
-    class Numeric : public DataBase {
+    class Numeric : public Base {
 
     public:
         Numeric(std::string name, uint32_t offset);
@@ -96,7 +96,7 @@ public:
     };
 
 
-    class Unit : public DataBase {
+    class Unit : public Base {
 
     public:
 
@@ -117,7 +117,7 @@ public:
     };
 
 
-    class StrName : public DataBase {
+    class StrName : public Base {
 
     public:
         StrName(std::string name = "Player Name", uint32_t offset = STRNAMEOFFSET);
@@ -155,7 +155,7 @@ public:
     };
 
 
-    class WinOrLose : public DataBase {
+    class WinOrLose : public Base {
 
     public:
         WinOrLose(std::string name, uint32_t offset);
