@@ -1,7 +1,7 @@
 {
   "ViewType": 0,
   "@ViewType": "0=Auto, 1=Manual, 2=ManualNoZero",
-  "NumericItems": [
+  "PanelItems": [
     "Player Name",
     "Balance",
     "Credit Spent",

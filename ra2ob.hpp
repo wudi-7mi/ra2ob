@@ -173,7 +173,7 @@ public:
     using Units = std::vector<Unit>;
     using WinOrLoses = std::vector<WinOrLose>;
 
-    Numerics loadNumericsFromJson(std::string filePath = "./numeric_offsets.json");
+    Numerics loadNumericsFromJson(std::string filePath = "./panel_offsets.json");
     Units loadUnitsFromJson(std::string filePath = "./unit_offsets.json");
     WinOrLoses initWinOrLose();
     void initDatas();

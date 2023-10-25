@@ -64,7 +64,7 @@ void Ra2ob::View::loadFromJson(std::string jsonFile) {
 
     m_viewType = ViewType(data["ViewType"]);
 
-    for (std::string it : data["NumericItems"]) {
+    for (std::string it : data["PanelItems"]) {
         json jsonArray = json::array();
 
         for (int i = 0; i < MAXPLAYER; i++) {
