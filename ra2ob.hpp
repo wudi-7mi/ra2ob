@@ -54,7 +54,7 @@ public:
     class View {
 
     public:
-        View(std::string jsonFile = "./view_n.json");
+        View(std::string jsonFile = "./view.json");
         ~View();
 
         void loadFromJson(std::string jsonFile);
