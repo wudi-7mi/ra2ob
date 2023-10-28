@@ -1,14 +1,32 @@
-#ifndef RA2OB_H_
-#define RA2OB_H_
+/*
+    Copyright (C) 2023  wudi-7mi  wudi7mi@gmail.com
 
-#include <iostream>
-#include <string>
-#include <vector>
-#include <map>
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU Affero General Public License as
+    published by the Free Software Foundation, either version 3 of the
+    License, or (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU Affero General Public License for more details.
+
+    You should have received a copy of the GNU Affero General Public License
+    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+*/
+
+#ifndef RA2OB_HPP_
+#define RA2OB_HPP_
 
 #include <Windows.h>
 
-#include "json.hpp"
+#include <iostream>
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+#include "./json.hpp"
 #include "spdlog/sinks/rotating_file_sink.h"
 
 #define MAXPLAYER 8
@@ -40,21 +58,19 @@
 using json = nlohmann::json;
 
 class Ra2ob {
-
 public:
     static Ra2ob& getInstance();
 
-    Ra2ob(const Ra2ob&) = delete;
-    void operator = (const Ra2ob&) = delete;
+    Ra2ob(const Ra2ob&)          = delete;
+    void operator=(const Ra2ob&) = delete;
 
     enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
     enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
     enum class ViewType : int { Auto = 0, Manual = 1, ManualNoZero = 2 };
 
     class View {
-
     public:
-        View(std::string jsonFile = "./view.json");
+        explicit View(std::string jsonFile = "./view.json");
         ~View();
 
         void loadFromJson(std::string jsonFile);
@@ -69,7 +85,6 @@ public:
     };
 
     class Base {
-
     public:
         Base(std::string name, uint32_t offset);
         virtual ~Base();
@@ -87,25 +102,15 @@ public:
         uint32_t m_size;
     };
 
-
     class Numeric : public Base {
-
     public:
         Numeric(std::string name, uint32_t offset);
         ~Numeric();
     };
 
-
     class Unit : public Base {
-
     public:
-
-        Unit(
-            std::string name,
-            uint32_t offset,
-            FactionType ft,
-            UnitType ut
-        );
+        Unit(std::string name, uint32_t offset, FactionType ft, UnitType ut);
         ~Unit();
 
         FactionType getFactionType();
@@ -116,11 +121,9 @@ public:
         UnitType m_unitType;
     };
 
-
     class StrName : public Base {
-
     public:
-        StrName(std::string name = "Player Name", uint32_t offset = STRNAMEOFFSET);
+        explicit StrName(std::string name = "Player Name", uint32_t offset = STRNAMEOFFSET);
         ~StrName();
 
         void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets);
@@ -131,32 +134,21 @@ public:
         std::vector<std::string> m_value;
     };
 
-
     class StrCountry : public StrName {
-
     public:
-        StrCountry(std::string name = "Country", uint32_t offset = STRCOUNTRYOFFSET);
+        explicit StrCountry(std::string name = "Country", uint32_t offset = STRCOUNTRYOFFSET);
         ~StrCountry();
 
         void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets);
-    
+
     protected:
         std::map<std::string, std::string> m_countryMap = {
-            { "Americans"       , "Americans"   },
-            { "Alliance"        , "Korea"       },
-            { "French"          , "French"      },
-            { "Germans"         , "Germans"     },
-            { "British"         , "British"     },
-            { "Africans"        , "Libya"       },
-            { "Arabs"           , "Iraq"        },
-            { "Russians"        , "Russians"    },
-            { "Confederation"   , "Cuba"        }
-        };
+            {"Americans", "Americans"}, {"Alliance", "Korea"},    {"French", "French"},
+            {"Germans", "Germans"},     {"British", "British"},   {"Africans", "Libya"},
+            {"Arabs", "Iraq"},          {"Russians", "Russians"}, {"Confederation", "Cuba"}};
     };
 
-
     class WinOrLose : public Base {
-
     public:
         WinOrLose(std::string name, uint32_t offset);
         ~WinOrLose();
@@ -169,8 +161,8 @@ public:
         std::vector<bool> m_value;
     };
 
-    using Numerics = std::vector<Numeric>;
-    using Units = std::vector<Unit>;
+    using Numerics   = std::vector<Numeric>;
+    using Units      = std::vector<Unit>;
     using WinOrLoses = std::vector<WinOrLose>;
 
     Numerics loadNumericsFromJson(std::string filePath = "./panel_offsets.json");
@@ -215,7 +207,6 @@ public:
 private:
     Ra2ob();
     ~Ra2ob();
-
 };
- 
-#endif
+
+#endif  // RA2OB_HPP_
