@@ -78,7 +78,15 @@ Ra2ob::View::~View() {}
 void Ra2ob::View::loadFromJson(std::string jsonFile) {
     std::vector<std::string> ret;
     std::ifstream f(jsonFile);
-    json data = json::parse(f);
+
+    json data;
+
+    try {
+        data = json::parse(f);
+    } catch (json::parse_error err) {
+        std::cerr << "view.json parse error." << std::endl;
+        std::exit(1);
+    }
 
     m_viewType = ViewType(data["ViewType"]);
 
@@ -355,7 +363,15 @@ Ra2ob::Numerics Ra2ob::loadNumericsFromJson(std::string filePath) {
     Numerics numerics;
 
     std::ifstream f(filePath);
-    json data = json::parse(f);
+    json data;
+
+    try {
+        data = json::parse(f);
+    } catch (json::parse_error err) {
+        std::cerr << "panel_offsets.json parse error." << std::endl;
+        _logger->error("panel_offsets.json parse error.");
+        std::exit(1);
+    }
 
     for (auto& it : data) {
         std::string offset = it["Offset"];
@@ -371,7 +387,15 @@ Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
     Units units;
 
     std::ifstream f(filePath);
-    json data = json::parse(f);
+    json data;
+
+    try {
+        data = json::parse(f);
+    } catch (json::parse_error err) {
+        std::cerr << "unit_offsets.json parse error." << std::endl;
+        _logger->error("unit_offsets.json parse error.");
+        std::exit(1);
+    }
 
     for (auto& ft : data.items()) {
         FactionType s_ft;
