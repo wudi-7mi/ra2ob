@@ -76,7 +76,7 @@ public:
         void loadFromJson(std::string jsonFile);
         void refreshView(std::string key, std::string value, int index);
         void sortView();
-        std::string viewToString();
+        void viewPrint();
         json viewToJson();
 
         json m_numericView, m_unitView, m_order, m_validPlayer;

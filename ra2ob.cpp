@@ -169,9 +169,7 @@ json Ra2ob::View::viewToJson() {
     return j;
 }
 
-std::string Ra2ob::View::viewToString() {
-    std::stringstream ss;
-
+void Ra2ob::View::viewPrint() {
     sortView();
 
     for (int i = 0; i < MAXPLAYER; i++) {
@@ -179,12 +177,21 @@ std::string Ra2ob::View::viewToString() {
             continue;
         }
 
-        ss << std::endl;
+        std::cout << std::endl;
 
         for (auto& it : m_numericView.items()) {
             auto v = it.value();
             if (v[i] != "0" && v[i] != "") {
-                ss << it.key() << ": " << v[i] << std::endl;
+                if (it.key() == "Player Name") {
+                    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+                    std::wstring wstr = converter.from_bytes(v[i]);
+
+                    std::cout << it.key() << ": ";
+                    std::wcout.imbue(std::locale("zh_CN"));
+                    std::wcout << wstr << std::endl;
+                } else {
+                    std::cout << it.key() << ": " << v[i] << std::endl;
+                }
             }
         }
 
@@ -192,15 +199,13 @@ std::string Ra2ob::View::viewToString() {
             auto v = it.value();
             if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
                 if (v[i] != "0" && v[i] != "") {
-                    ss << it.key() << ": " << v[i] << std::endl;
+                    std::cout << it.key() << ": " << v[i] << std::endl;
                 }
             } else {
-                ss << it.key() << ": " << v[i] << std::endl;
+                std::cout << it.key() << ": " << v[i] << std::endl;
             }
         }
     }
-
-    return ss.str();
 }
 
 Ra2ob::Base::Base(std::string name, uint32_t offset) {
@@ -597,9 +602,8 @@ void Ra2ob::updateView(bool show) {
     }
 
     if (show) {
-        std::cout << _view.viewToString();
+        _view.viewPrint();
     }
-    _logger->info(_view.viewToString());
 }
 
 int Ra2ob::getHandle(bool show) {
