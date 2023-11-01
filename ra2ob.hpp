@@ -27,7 +27,7 @@
 #include <vector>
 
 #include "./json.hpp"
-#include "spdlog/sinks/rotating_file_sink.h"
+#include "spdlog/spdlog.h"
 
 #define MAXPLAYER 8
 #define INVALIDCLASS 0xffffffffu

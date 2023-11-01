@@ -31,6 +31,8 @@
 #include <thread>  // NOLINT
 #include <vector>
 
+#include "spdlog/sinks/rotating_file_sink.h"
+
 using json = nlohmann::json;
 
 Ra2ob& Ra2ob::getInstance() {
