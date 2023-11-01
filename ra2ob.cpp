@@ -131,6 +131,45 @@ void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
 
 void Ra2ob::View::sortView() {}
 
+void Ra2ob::View::viewPrint() {
+    sortView();
+
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!m_validPlayer[i]) {
+            continue;
+        }
+
+        std::cout << std::endl;
+
+        for (auto& it : m_numericView.items()) {
+            auto v = it.value();
+            if (v[i] != "0" && v[i] != "") {
+                if (it.key() == "Player Name") {
+                    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+                    std::wstring wstr = converter.from_bytes(v[i]);
+
+                    std::cout << it.key() << ": ";
+                    std::wcout.imbue(std::locale("zh_CN"));
+                    std::wcout << wstr << std::endl;
+                } else {
+                    std::cout << it.key() << ": " << v[i] << std::endl;
+                }
+            }
+        }
+
+        for (auto& it : m_unitView.items()) {
+            auto v = it.value();
+            if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
+                if (v[i] != "0" && v[i] != "") {
+                    std::cout << it.key() << ": " << v[i] << std::endl;
+                }
+            } else {
+                std::cout << it.key() << ": " << v[i] << std::endl;
+            }
+        }
+    }
+}
+
 json Ra2ob::View::viewToJson() {
     json j;
 
@@ -171,43 +210,73 @@ json Ra2ob::View::viewToJson() {
     return j;
 }
 
-void Ra2ob::View::viewPrint() {
-    sortView();
+json Ra2ob::View::viewToJsonFull() {
+    json j;
+
+    j["player_info"] = json::array();
 
     for (int i = 0; i < MAXPLAYER; i++) {
+        json jp;
+
+        jp["player_index"] = i;
+
         if (!m_validPlayer[i]) {
+            jp["player_valid"] = false;
             continue;
         }
 
-        std::cout << std::endl;
+        jp["player_valid"] = true;
 
         for (auto& it : m_numericView.items()) {
-            auto v = it.value();
-            if (v[i] != "0" && v[i] != "") {
-                if (it.key() == "Player Name") {
-                    std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-                    std::wstring wstr = converter.from_bytes(v[i]);
-
-                    std::cout << it.key() << ": ";
-                    std::wcout.imbue(std::locale("zh_CN"));
-                    std::wcout << wstr << std::endl;
-                } else {
-                    std::cout << it.key() << ": " << v[i] << std::endl;
-                }
-            }
+            auto v       = it.value();
+            jp[it.key()] = v[i];
         }
+
+        json ui;
 
         for (auto& it : m_unitView.items()) {
-            auto v = it.value();
-            if (m_viewType == ViewType::Auto || m_viewType == ViewType::ManualNoZero) {
-                if (v[i] != "0" && v[i] != "") {
-                    std::cout << it.key() << ": " << v[i] << std::endl;
-                }
-            } else {
-                std::cout << it.key() << ": " << v[i] << std::endl;
-            }
+            auto v       = it.value();
+            ui[it.key()] = v[i];
         }
+
+        jp["unit_info"] = ui;
+
+        j["player_info"].emplace_back(jp);
     }
+
+    j["game_running"] = m_gameValid;
+
+    return j;
+}
+
+json Ra2ob::View::getPlayerPanelInfo(int index) {
+    if (!m_validPlayer[index]) {
+        return json({});
+    }
+
+    json j;
+
+    for (auto& it : m_numericView.items()) {
+        auto v      = it.value();
+        j[it.key()] = v[index];
+    }
+
+    return j;
+}
+
+json Ra2ob::View::getPlayerUnitInfo(int index) {
+    if (!m_validPlayer[index]) {
+        return json({});
+    }
+
+    json j;
+
+    for (auto& it : m_unitView.items()) {
+        auto v      = it.value();
+        j[it.key()] = v[index];
+    }
+
+    return j;
 }
 
 Ra2ob::Base::Base(std::string name, uint32_t offset) {

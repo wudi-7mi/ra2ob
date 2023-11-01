@@ -78,6 +78,9 @@ public:
         void sortView();
         void viewPrint();
         json viewToJson();
+        json viewToJsonFull();
+        json getPlayerPanelInfo(int index);
+        json getPlayerUnitInfo(int index);
 
         json m_numericView, m_unitView, m_order, m_validPlayer;
         bool m_gameValid;

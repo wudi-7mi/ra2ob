@@ -28,7 +28,10 @@ int main() {
         Sleep(1000);
 
         // g._view.viewPrint();
-        std::cout << g._view.viewToJson().dump() << std::endl;
+        // std::cout << g._view.viewToJson().dump() << std::endl;
+        // std::cout << g._view.viewToJsonFull().dump() << std::endl;
+        std::cout << g._view.getPlayerPanelInfo(0).dump() << std::endl;
+        std::cout << g._view.getPlayerUnitInfo(0).dump() << std::endl;
     }
 
     return 0;
