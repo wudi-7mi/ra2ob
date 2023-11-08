@@ -38,3 +38,4 @@ cbuild
 # Others
 .vscode
 logs
+nologger
