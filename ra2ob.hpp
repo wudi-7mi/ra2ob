@@ -82,7 +82,11 @@ public:
         json getPlayerPanelInfo(int index);
         json getPlayerUnitInfo(int index);
 
-        json m_numericView, m_unitView, m_order, m_validPlayer;
+        json m_numericView;
+        json m_unitView;
+        json m_order;
+        json m_validPlayer;
+        json m_debugInfo;
         bool m_gameValid;
         ViewType m_viewType;
     };

@@ -119,6 +119,12 @@ void Ra2ob::View::loadFromJson(std::string jsonFile) {
         jsonValidPlayer.push_back(false);
     }
     m_validPlayer = jsonValidPlayer;
+
+    json jsonPlayerbase = json::array();
+    for (int i = 0; i < MAXPLAYER; i++) {
+        jsonPlayerbase.push_back("");
+    }
+    m_debugInfo["Playerbase"] = jsonPlayerbase;
 }
 
 void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
@@ -126,6 +132,8 @@ void Ra2ob::View::refreshView(std::string key, std::string value, int index) {
         m_numericView[key][index] = value;
     } else if (m_unitView.contains(key)) {
         m_unitView[key][index] = value;
+    } else {
+        m_debugInfo[key][index] = value;
     }
 }
 
@@ -213,7 +221,8 @@ json Ra2ob::View::viewToJson() {
 json Ra2ob::View::viewToJsonFull() {
     json j;
 
-    j["player_info"] = json::array();
+    j["player_info"]   = json::array();
+    j["valid_players"] = json::array();
 
     for (int i = 0; i < MAXPLAYER; i++) {
         json jp;
@@ -221,11 +230,10 @@ json Ra2ob::View::viewToJsonFull() {
         jp["player_index"] = i;
 
         if (!m_validPlayer[i]) {
-            jp["player_valid"] = false;
             continue;
         }
 
-        jp["player_valid"] = true;
+        j["valid_players"].emplace_back(i);
 
         for (auto& it : m_numericView.items()) {
             auto v       = it.value();
@@ -245,6 +253,7 @@ json Ra2ob::View::viewToJsonFull() {
     }
 
     j["game_running"] = m_gameValid;
+    j["debug_info"]   = m_debugInfo;
 
     return j;
 }
@@ -670,6 +679,9 @@ void Ra2ob::updateView(bool show) {
         if (_winOrLoses[1].getValueByIndex(i) == true) {
             _view.refreshView("Win Or Lose", "lose", i);
         }
+
+        // Refresh playerbase
+        _view.refreshView("Playerbase", std::to_string(_playerBases[i]), i);
     }
 
     if (show) {
