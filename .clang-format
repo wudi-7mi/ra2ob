@@ -17,4 +17,5 @@ SpacesInLineCommentPrefix:
 InsertNewlineAtEOF: true
 
 AlignConsecutiveAssignments: true
-AlignConsecutiveMacros: AcrossEmptyLinesAndComments
+AlignConsecutiveMacros:
+    Enabled: true
