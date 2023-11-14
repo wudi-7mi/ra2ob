@@ -358,7 +358,7 @@ void Ra2ob::Unit::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets,
             continue;
         }
 
-        if (valids.size() == 0 || m_offset > valids[i] * 4) {
+        if (valids.size() == 0 || m_offset >= valids[i] * 4) {
             m_value[i] = 0;
             continue;
         }
