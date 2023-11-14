@@ -29,33 +29,76 @@
 #include "./json.hpp"
 #include "spdlog/spdlog.h"
 
-#define MAXPLAYER 8
+#define MAXPLAYER    8
 #define INVALIDCLASS 0xffffffffu
 
-#define BOOLSIZE 1
-#define NUMSIZE 4
-#define PTRSIZE 4
-#define STRNAMESIZE 32
-#define STRCOUNTRYSIZE 25
+#define BOOLSIZE        1
+#define NUMSIZE         4
+#define PTRSIZE         4
+#define COLORSIZE       6
+#define STRNAMESIZE     32
+#define STRCOUNTRYSIZE  25
+#define STRUNITNAMESIZE 32
 
-#define FIXEDOFFSET 0xa8b230
-#define CLASSBASEARRAYOFFSET 0xa8022c
+#define FIXEDOFFSET              0xa8b230
+#define CLASSBASEARRAYOFFSET     0xa8022c
 #define PLAYERBASEARRAYPTROFFSET 0x1180
-#define HOUSETYPEOFFSET 0x34
-#define BUILDINGOFFSET 0x5554
-#define TANKOFFSET 0x5568
-#define INFANTRYOFFSET 0x557c
-#define AIRCRAFTOFFSET 0x5590
+#define HOUSETYPEOFFSET          0x34
+#define BUILDINGOFFSET           0x5554
+#define TANKOFFSET               0x5568
+#define INFANTRYOFFSET           0x557c
+#define AIRCRAFTOFFSET           0x5590
+#define COLOROFFSET              0x56F9
 
-#define STRNAMEOFFSET 0x1602a
+#define STRNAMEOFFSET    0x1602a
 #define STRCOUNTRYOFFSET 0x24
 
-#define WINOFFSET 0x1f7
+#define WINOFFSET  0x1f7
 #define LOSEOFFSET 0x1f8
 
 #define UNITSAFE 4096
 
+// Production Offsets
+#define P_BUILDINGFIRSTOFFSET  0x53BC
+#define P_BUILDINGSECONDOFFSET 0x53CC
+#define P_INFANTRYOFFSET       0x53B0
+#define P_TANKOFFSET           0x53B4
+#define P_SHIPOFFSET           0x53B8
+
+#define P_TIMEOFFSET        0x24
+#define P_QUEUEPTROFFSET    0x44
+#define P_QUEUELENGTHOFFSET 0x50
+#define P_STATUSOFFSET      0x70
+
+#define P_NAMEOFFSET 0x64
+
+// Color Codes
+#define C_YELLOW  0xE0D838
+#define C_PURPLE  0x9848B8
+#define C_GREEN   0x58CC50
+#define C_RED     0xF84C48
+#define C_ORANGE  0xF8B048
+#define C_PINK    0xF8ACE8
+#define C_SKYBLUE 0x58D4E0
+
 using json = nlohmann::json;
+
+struct BuildingNode {
+    int number = 0;
+    std::string name;
+    int progress = 0;
+    int status   = 0;  // 0 - in queue, 1 - stopped, 2 - building.
+
+    explicit BuildingNode(std::string n) { name = n; }
+
+    void setStop() { status = 1; }
+
+    void setStart() { status = 2; }
+};
+
+struct BuildingList {
+    std::vector<BuildingNode> list;
+};
 
 class Ra2ob {
 public:
@@ -64,7 +107,6 @@ public:
     Ra2ob(const Ra2ob&)          = delete;
     void operator=(const Ra2ob&) = delete;
 
-    enum class FactionType : int { Soviet = 2, Allied = 1, Unknown = 0 };
     enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
     enum class ViewType : int { Auto = 0, Manual = 1, ManualNoZero = 2 };
 
@@ -117,14 +159,15 @@ public:
 
     class Unit : public Base {
     public:
-        Unit(std::string name, uint32_t offset, FactionType ft, UnitType ut);
+        Unit(std::string name, uint32_t offset, UnitType ut);
         ~Unit();
 
-        FactionType getFactionType();
+        void fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets,
+                       std::vector<uint32_t> valids);
+
         UnitType getUnitType();
 
     protected:
-        FactionType m_factionType;
         UnitType m_unitType;
     };
 
@@ -173,7 +216,7 @@ public:
     using WinOrLoses = std::vector<WinOrLose>;
 
     Numerics loadNumericsFromJson(std::string filePath = "./panel_offsets.json");
-    Units loadUnitsFromJson(std::string filePath = "./unit_offsets.json");
+    Units loadUnitsFromJson(std::string filePath = "./new_unit.json");
     WinOrLoses initWinOrLose();
     void initDatas();
     bool initAddrs();
@@ -181,10 +224,16 @@ public:
     bool refreshInfo();
     void updateView(bool show = true);
     int getHandle(bool show = true);
+
     uint32_t getAddr(uint32_t offset);
-    FactionType countryToFaction(std::string country);
+    int getInt(uint32_t offset);
+    std::string getString(uint32_t offset);
+    uint32_t getColor(uint32_t offset);
+
     static bool readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size);
     std::string getTime();
+    void refreshBuildingList();
+    void refreshColors();
 
     void close();
     void detectTask(bool show = true, int interval = 500);
@@ -202,14 +251,23 @@ public:
     StrCountry _strCountry;
     View _view;
 
+    std::vector<BuildingList> _buildingList;
+    std::vector<uint32_t> _colors;
+
     std::vector<bool> _players;
     std::vector<uint32_t> _playerBases;
+
     std::vector<uint32_t> _buildings;
     std::vector<uint32_t> _infantrys;
     std::vector<uint32_t> _tanks;
     std::vector<uint32_t> _aircrafts;
+
+    std::vector<uint32_t> _buildings_valid;
+    std::vector<uint32_t> _infantrys_valid;
+    std::vector<uint32_t> _tanks_valid;
+    std::vector<uint32_t> _aircrafts_valid;
+
     std::vector<uint32_t> _houseTypes;
-    std::vector<FactionType> _factionTypes;
 
 private:
     Ra2ob();

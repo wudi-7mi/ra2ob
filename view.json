@@ -7,7 +7,9 @@
     "Credit Spent",
     "Power Output",
     "Power Drain",
-    "Win Or Lose"
+    "Win Or Lose",
+    "Color",
+    "Country"
   ],
   "UnitItems": {
     "DefaultView": [

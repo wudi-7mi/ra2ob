@@ -54,14 +54,22 @@ Ra2ob::Ra2ob() {
 
     initDatas();
 
-    _players      = std::vector<bool>(MAXPLAYER, false);
-    _playerBases  = std::vector<uint32_t>(MAXPLAYER, 0);
-    _buildings    = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys    = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks        = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts    = std::vector<uint32_t>(MAXPLAYER, 0);
+    _players     = std::vector<bool>(MAXPLAYER, false);
+    _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
+    _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
+    _tanks     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    _buildings_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _infantrys_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _tanks_valid     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _aircrafts_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+
     _houseTypes   = std::vector<uint32_t>(MAXPLAYER, 0);
-    _factionTypes = std::vector<FactionType>(MAXPLAYER, FactionType::Unknown);
+    _buildingList = std::vector<BuildingList>(MAXPLAYER, BuildingList());
+    _colors       = std::vector<uint32_t>(MAXPLAYER, 0x000000);
 }
 
 Ra2ob::~Ra2ob() {
@@ -337,15 +345,30 @@ Ra2ob::Numeric::Numeric(std::string name, uint32_t offset) : Base(name, offset) 
 
 Ra2ob::Numeric::~Numeric() {}
 
-Ra2ob::Unit::Unit(std::string name, uint32_t offset, FactionType ft, UnitType ut)
-    : Ra2ob::Base(name, offset) {
-    m_factionType = ft;
-    m_unitType    = ut;
+Ra2ob::Unit::Unit(std::string name, uint32_t offset, UnitType ut) : Ra2ob::Base(name, offset) {
+    m_unitType = ut;
 }
 
 Ra2ob::Unit::~Unit() {}
 
-Ra2ob::FactionType Ra2ob::Unit::getFactionType() { return m_factionType; }
+void Ra2ob::Unit::fetchData(HANDLE pHandle, std::vector<uint32_t> baseOffsets,
+                            std::vector<uint32_t> valids) {
+    for (int i = 0; i < baseOffsets.size(); i++) {
+        if (baseOffsets[i] == 0) {
+            continue;
+        }
+
+        if (valids.size() == 0 || m_offset > valids[i]) {
+            m_value[i] = 0;
+            continue;
+        }
+
+        uint32_t buf = 0;
+
+        readMemory(pHandle, baseOffsets[i] + m_offset, &buf, m_size);
+        m_value[i] = buf;
+    }
+}
 
 Ra2ob::UnitType Ra2ob::Unit::getUnitType() { return m_unitType; }
 
@@ -482,42 +505,31 @@ Ra2ob::Units Ra2ob::loadUnitsFromJson(std::string filePath) {
         std::exit(1);
     }
 
-    for (auto& ft : data.items()) {
-        FactionType s_ft;
+    for (auto& ut : data.items()) {
+        UnitType s_ut;
 
-        if (ft.key() == "Soviet") {
-            s_ft = FactionType::Soviet;
-        } else if (ft.key() == "Allied") {
-            s_ft = FactionType::Allied;
+        if (ut.key() == "Building") {
+            s_ut = UnitType::Building;
+        } else if (ut.key() == "Tank") {
+            s_ut = UnitType::Tank;
+        } else if (ut.key() == "Infantry") {
+            s_ut = UnitType::Infantry;
+        } else if (ut.key() == "Aircraft") {
+            s_ut = UnitType::Aircraft;
         } else {
-            s_ft = FactionType::Unknown;
+            s_ut = UnitType::Unknown;
         }
 
-        for (auto& ut : data[ft.key()].items()) {
-            UnitType s_ut;
-
-            if (ut.key() == "Building") {
-                s_ut = UnitType::Building;
-            } else if (ut.key() == "Tank") {
-                s_ut = UnitType::Tank;
-            } else if (ut.key() == "Infantry") {
-                s_ut = UnitType::Infantry;
-            } else if (ut.key() == "Aircraft") {
-                s_ut = UnitType::Aircraft;
-            } else {
-                s_ut = UnitType::Unknown;
+        for (auto& u : data[ut.key()]) {
+            if (u.empty()) {
+                continue;
             }
 
-            for (auto& u : data[ft.key()][ut.key()]) {
-                if (u.empty()) {
-                    continue;
-                }
+            std::string offset = u["Offset"];
+            uint32_t s_offset  = std::stoul(offset, nullptr, 16);
 
-                std::string offset = u["Offset"];
-                uint32_t s_offset  = std::stoul(offset, nullptr, 16);
-                Unit ub(u["Name"], s_offset, s_ft, s_ut);
-                units.push_back(ub);
-            }
+            Unit ub(u["Name"], s_offset, s_ut);
+            units.push_back(ub);
         }
     }
 
@@ -566,11 +578,18 @@ bool Ra2ob::initAddrs() {
 
             _players[i]     = true;
             _playerBases[i] = realPlayerBase;
-            _buildings[i]   = getAddr(realPlayerBase + BUILDINGOFFSET);
-            _tanks[i]       = getAddr(realPlayerBase + TANKOFFSET);
-            _infantrys[i]   = getAddr(realPlayerBase + INFANTRYOFFSET);
-            _aircrafts[i]   = getAddr(realPlayerBase + AIRCRAFTOFFSET);
-            _houseTypes[i]  = getAddr(realPlayerBase + HOUSETYPEOFFSET);
+
+            _buildings[i] = getAddr(realPlayerBase + BUILDINGOFFSET);
+            _tanks[i]     = getAddr(realPlayerBase + TANKOFFSET);
+            _infantrys[i] = getAddr(realPlayerBase + INFANTRYOFFSET);
+            _aircrafts[i] = getAddr(realPlayerBase + AIRCRAFTOFFSET);
+
+            _buildings_valid[i] = getAddr(realPlayerBase + BUILDINGOFFSET + 4);
+            _tanks_valid[i]     = getAddr(realPlayerBase + TANKOFFSET + 4);
+            _infantrys_valid[i] = getAddr(realPlayerBase + INFANTRYOFFSET + 4);
+            _aircrafts_valid[i] = getAddr(realPlayerBase + AIRCRAFTOFFSET + 4);
+
+            _houseTypes[i] = getAddr(realPlayerBase + HOUSETYPEOFFSET);
 
             if (_buildings[i] == 1 && _tanks[i] == 1 && _infantrys[i] == 1 && _aircrafts[i] == 1 &&
                 _houseTypes[i] == 1) {
@@ -609,13 +628,13 @@ bool Ra2ob::refreshInfo() {
 
     for (auto& it : _units) {
         if (it.getUnitType() == UnitType::Building) {
-            it.fetchData(_pHandle, _buildings);
+            it.fetchData(_pHandle, _buildings, _buildings_valid);
         } else if (it.getUnitType() == UnitType::Infantry) {
-            it.fetchData(_pHandle, _infantrys);
+            it.fetchData(_pHandle, _infantrys, _infantrys_valid);
         } else if (it.getUnitType() == UnitType::Tank) {
-            it.fetchData(_pHandle, _tanks);
+            it.fetchData(_pHandle, _tanks, _tanks_valid);
         } else {
-            it.fetchData(_pHandle, _aircrafts);
+            it.fetchData(_pHandle, _aircrafts, _aircrafts_valid);
         }
     }
 
@@ -625,6 +644,9 @@ bool Ra2ob::refreshInfo() {
 
     _strName.fetchData(_pHandle, _playerBases);
     _strCountry.fetchData(_pHandle, _houseTypes);
+
+    refreshBuildingList();
+    refreshColors();
 
     return true;
 }
@@ -644,11 +666,9 @@ void Ra2ob::updateView(bool show) {
         // Refresh Name & Country
         _view.refreshView(_strName.getName(), _strName.getValueByIndex(i), i);
         _view.refreshView(_strCountry.getName(), _strCountry.getValueByIndex(i), i);
-        if (countryToFaction(_strCountry.getValueByIndex(i)) == FactionType::Allied) {
-            _factionTypes[i] = FactionType::Allied;
-        } else {
-            _factionTypes[i] = FactionType::Soviet;
-        }
+
+        // Refresh Color
+        _view.refreshView("Color", std::to_string(_colors[i]), i);
 
         // Refresh numeric values
         for (auto& it : _numerics) {
@@ -659,9 +679,6 @@ void Ra2ob::updateView(bool show) {
 
         // Refresh units
         for (auto& it : _units) {
-            if (it.getFactionType() != _factionTypes[i]) {
-                continue;
-            }
             if (_view.m_unitView.find(it.getName()) != _view.m_unitView.end()) {
                 int unitNum = it.getValueByIndex(i);
 
@@ -792,12 +809,32 @@ uint32_t Ra2ob::getAddr(uint32_t offset) {
     return buf;
 }
 
-Ra2ob::FactionType Ra2ob::countryToFaction(std::string country) {
-    if (country == "Americans" || country == "Korea" || country == "French" ||
-        country == "Germans" || country == "British") {
-        return FactionType::Allied;
+int Ra2ob::getInt(uint32_t offset) {
+    int buf = 0;
+
+    if (!readMemory(_pHandle, offset, &buf, 4)) {
+        return -1;
     }
-    return FactionType::Soviet;
+
+    return buf;
+}
+
+std::string Ra2ob::getString(uint32_t offset) {
+    char buf[STRUNITNAMESIZE] = "\0";
+
+    readMemory(_pHandle, offset, &buf, STRUNITNAMESIZE);
+
+    std::string ret = buf;
+
+    return ret;
+}
+
+uint32_t Ra2ob::getColor(uint32_t offset) {
+    uint32_t buf = 0;
+
+    readMemory(_pHandle, offset, &buf, 3);
+
+    return buf;
 }
 
 bool Ra2ob::readMemory(HANDLE handle, uint32_t addr, void* value, uint32_t size) {
@@ -812,6 +849,50 @@ std::string Ra2ob::getTime() {
     std::string timeStr = timeBuffer;
 
     return timeStr;
+}
+
+void Ra2ob::refreshBuildingList() {
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!_players[i]) {
+            continue;
+        }
+
+        uint32_t addr = _playerBases[i];
+        uint32_t base = getAddr(addr + P_INFANTRYOFFSET);
+
+        int currentCD      = getInt(base + P_TIMEOFFSET);
+        int status         = getInt(base + P_STATUSOFFSET);
+        uint32_t queueAddr = getAddr(base + P_QUEUEPTROFFSET);
+        int queueLen       = getInt(base + P_QUEUELENGTHOFFSET);
+
+        BuildingList bl;
+
+        for (int j = 0; j < queueLen; j++) {
+            int nodeAddr = getAddr(queueAddr + j * 4);
+
+            std::string name = getString(nodeAddr + P_NAMEOFFSET);
+            BuildingNode bn  = BuildingNode(name);
+
+            bl.list.push_back(bn);
+        }
+
+        _buildingList[i] = bl;
+    }
+}
+
+void Ra2ob::refreshColors() {
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!_players[i]) {
+            continue;
+        }
+
+        uint32_t addr  = _playerBases[i];
+        uint32_t color = getColor(addr + COLOROFFSET);
+
+        color = (color & 0x00FF00) | (color << 16 & 0xFF0000) | (color >> 16 & 0x0000FF);
+
+        _colors[i] = color;
+    }
 }
 
 void Ra2ob::close() {
