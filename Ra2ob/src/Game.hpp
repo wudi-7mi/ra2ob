@@ -25,11 +25,12 @@ public:
     void operator=(const Game&) = delete;
 
     void getHandle();
-    void initDatas();
     void initAddrs();
 
     void loadNumericsFromJson(std::string filePath = F_PANELOFFSETS);
     void loadUnitsFromJson(std::string filePath = F_UNITOFFSETS);
+    void initStrTypes();
+    void initVectors();
     void initGameInfo();
 
     int hasPlayer();
@@ -86,27 +87,11 @@ Game& Game::getInstance() {
 }
 
 Game::Game() {
-    _strName    = StrName();
-    _strCountry = StrCountry();
-
-    initDatas();
-
-    _players     = std::vector<bool>(MAXPLAYER, false);
-    _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
-
-    _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
-
-    _buildings_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks_valid     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-
-    _houseTypes    = std::vector<uint32_t>(MAXPLAYER, 0);
-    _buildingInfos = std::vector<tagBuildingInfo>(MAXPLAYER, tagBuildingInfo());
-    _colors        = std::vector<std::string>(MAXPLAYER, "0x000000");
+    loadNumericsFromJson();
+    loadUnitsFromJson();
+    initStrTypes();
+    initVectors();
+    initGameInfo();
 }
 
 Game::~Game() {
@@ -200,15 +185,6 @@ void Game::getHandle() {
 }
 
 /**
- * Initialize numeric items and units from json; initialize game info.
- */
-void Game::initDatas() {
-    loadNumericsFromJson();
-    loadUnitsFromJson();
-    initGameInfo();
-}
-
-/**
  * Initialize all the addresses.
  */
 void Game::initAddrs() {
@@ -291,6 +267,30 @@ void Game::loadUnitsFromJson(std::string filePath) {
             _units.items.push_back(ub);
         }
     }
+}
+
+void Game::initStrTypes() {
+    _strName    = StrName();
+    _strCountry = StrCountry();
+}
+
+void Game::initVectors() {
+    _players     = std::vector<bool>(MAXPLAYER, false);
+    _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
+    _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
+    _tanks     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    _buildings_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _infantrys_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _tanks_valid     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _aircrafts_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+
+    _houseTypes    = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildingInfos = std::vector<tagBuildingInfo>(MAXPLAYER, tagBuildingInfo());
+    _colors        = std::vector<std::string>(MAXPLAYER, "0x000000");
 }
 
 void Game::initGameInfo() {
@@ -450,10 +450,12 @@ void Game::restart() {
     if (r.getHandle() != nullptr) {
         CloseHandle(r.getHandle());
     }
-    _strName    = StrName();
-    _strCountry = StrCountry();
-    initDatas();
+
     std::cout << "Handle Closed.\n";
+
+    initStrTypes();
+    initVectors();
+    initGameInfo();
 }
 
 void Game::startLoop() {
