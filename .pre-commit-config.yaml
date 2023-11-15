@@ -6,4 +6,6 @@ repos:
       - id: clang-format
         args: [-i, --style=file:.clang-format]
       - id: cpplint
-        args: [--linelength=100, --filter=-whitespace/indent]
+        args: [--linelength=100, "--filter=-whitespace/indent,-legal/copyright"]
+exclude: |
+  json.hpp

@@ -8,8 +8,8 @@ Run `ra2ob.exe` as Administrator.
 
 ## Todos
 
-- [ ] Add Logs.
 - [ ] Add Documents.
+- [ ] Add Producing List.
 
 ## Develop
 
@@ -18,7 +18,8 @@ Run `ra2ob.exe` as Administrator.
 2. CMake
 
 ```shell
-mkdir build && cd build
+mkdir build
+cd build
 cmake ..
 ```
 
