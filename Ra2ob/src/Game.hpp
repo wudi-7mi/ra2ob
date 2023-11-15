@@ -46,16 +46,12 @@ public:
     void fetchTask(int inferval = 500);
     void startLoop();
 
-    std::vector<Numeric> _numerics;
-    std::vector<Unit> _units;
-    tagNumerics _n;
-    tagUnits _u;
-    tagGameInfo _gi;
+    tagNumerics _numerics;
+    tagUnits _units;
+    tagGameInfo _gameInfo;
 
     StrName _strName;
     StrCountry _strCountry;
-
-    bool _valid = false;
 
     std::vector<tagBuildingInfo> _buildingInfos;
     std::vector<std::string> _colors;
@@ -77,7 +73,7 @@ public:
 
     FileIO fio;
     Reader r;
-    Viewer v;
+    Viewer viewer;
 
 private:
     Game();
@@ -253,22 +249,20 @@ void Game::initAddrs() {
 void Game::loadNumericsFromJson(std::string filePath) {
     json data = fio.readJson(filePath);
 
-    _numerics.clear();
-    _n.items.clear();
+    _numerics.items.clear();
 
     for (auto& it : data) {
         std::string offset = it["Offset"];
         uint32_t s_offset  = std::stoul(offset, nullptr, 16);
         Numeric n(it["Name"], s_offset);
-        _numerics.push_back(n);
-        _n.items.push_back(n);
+        _numerics.items.push_back(n);
     }
 }
 
 void Game::loadUnitsFromJson(std::string filePath) {
     json data = fio.readJson(filePath);
 
-    _units.clear();
+    _units.items.clear();
 
     for (auto& ut : data.items()) {
         UnitType s_ut;
@@ -294,19 +288,19 @@ void Game::loadUnitsFromJson(std::string filePath) {
             uint32_t s_offset  = std::stoul(offset, nullptr, 16);
 
             Unit ub(u["Name"], s_offset, s_ut);
-            _units.push_back(ub);
+            _units.items.push_back(ub);
         }
     }
 }
 
 void Game::initGameInfo() {
-    _gi.players            = std::vector<tagPlayer>(MAXPLAYER, tagPlayer());
-    _gi.debug.playerBase   = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gi.debug.buildingBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gi.debug.infantryBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gi.debug.tankBase     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gi.debug.aircraftBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gi.debug.houseType    = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.players            = std::vector<tagPlayer>(MAXPLAYER, tagPlayer());
+    _gameInfo.debug.playerBase   = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.debug.buildingBase = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.debug.infantryBase = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.debug.tankBase     = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.debug.aircraftBase = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.debug.houseType    = std::vector<uint32_t>(MAXPLAYER, 0);
 }
 
 /**
@@ -333,20 +327,15 @@ int Game::hasPlayer() {
 void Game::refreshInfo() {
     if (!hasPlayer()) {
         std::cerr << "No valid player to show info.\n";
-        _valid    = false;
-        _gi.valid = false;
+        _gameInfo.valid = false;
         return;
     }
 
-    for (auto& it : _numerics) {
+    for (auto& it : _numerics.items) {
         it.fetchData(r, _playerBases);
     }
 
-    for (auto& it : _n.items) {
-        it.fetchData(r, _playerBases);
-    }
-
-    for (auto& it : _units) {
+    for (auto& it : _units.items) {
         if (it.getUnitType() == UnitType::Building) {
             it.fetchData(r, _buildings, _buildings_valid);
         } else if (it.getUnitType() == UnitType::Infantry) {
@@ -424,16 +413,16 @@ void Game::structBuild() {
         // Panel info
         tagPanelInfo pi;
         pi.playerName  = _strName.getValueByIndex(i);
-        pi.balance     = _n.getItem("Balance").getValueByIndex(i);
-        pi.creditSpent = _n.getItem("Credit Spent").getValueByIndex(i);
-        pi.powerDrain  = _n.getItem("Power Drain").getValueByIndex(i);
-        pi.powerOutput = _n.getItem("Power Output").getValueByIndex(i);
+        pi.balance     = _numerics.getItem("Balance").getValueByIndex(i);
+        pi.creditSpent = _numerics.getItem("Credit Spent").getValueByIndex(i);
+        pi.powerDrain  = _numerics.getItem("Power Drain").getValueByIndex(i);
+        pi.powerOutput = _numerics.getItem("Power Output").getValueByIndex(i);
         pi.color       = _colors[i];
         pi.country     = _strCountry.getValueByIndex(i);
 
         // Units info
         tagUnitsInfo ui;
-        for (auto& it : _units) {
+        for (auto& it : _units.items) {
             tagUnitSingle us;
             us.unitName = it.getName();
             us.num      = it.getValueByIndex(i);
@@ -447,13 +436,13 @@ void Game::structBuild() {
         p.building = _buildingInfos[i];
 
         // Game info
-        _gi.players[i]            = p;
-        _gi.debug.playerBase[i]   = _playerBases[i];
-        _gi.debug.buildingBase[i] = _buildings[i];
-        _gi.debug.infantryBase[i] = _infantrys[i];
-        _gi.debug.tankBase[i]     = _tanks[i];
-        _gi.debug.aircraftBase[i] = _aircrafts[i];
-        _gi.debug.houseType[i]    = _houseTypes[i];
+        _gameInfo.players[i]            = p;
+        _gameInfo.debug.playerBase[i]   = _playerBases[i];
+        _gameInfo.debug.buildingBase[i] = _buildings[i];
+        _gameInfo.debug.infantryBase[i] = _infantrys[i];
+        _gameInfo.debug.tankBase[i]     = _tanks[i];
+        _gameInfo.debug.aircraftBase[i] = _aircrafts[i];
+        _gameInfo.debug.houseType[i]    = _houseTypes[i];
     }
 }
 
@@ -480,12 +469,10 @@ void Game::detectTask(int interval) {
     while (true) {
         getHandle();
         if (r.getHandle() != nullptr) {
-            _gi.valid = true;
-            _valid    = true;
+            _gameInfo.valid = true;
             initAddrs();
         } else {
-            _gi.valid = false;
-            _valid    = false;
+            _gameInfo.valid = false;
         }
 
         Sleep(interval);
@@ -494,13 +481,10 @@ void Game::detectTask(int interval) {
 
 void Game::fetchTask(int interval) {
     while (true) {
-        if (_valid) {
+        if (_gameInfo.valid) {
             refreshInfo();
             structBuild();
             initAddrs();
-
-            system("cls");
-            v.print(_gi, 0);
         }
 
         Sleep(interval);
