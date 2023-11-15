@@ -38,133 +38,176 @@
         "Index": 1
       },
       {
-        "Name": "Grand Cannon"
+        "Name": "Grand Cannon",
+        "Index": 1
       },
       {
-        "Name": "Mirage Tank"
+        "Name": "Mirage Tank",
+        "Index": 1
       },
       {
-        "Name": "Prism Tank"
+        "Name": "Prism Tank",
+        "Index": 1
       },
       {
-        "Name": "Allied MCV"
+        "Name": "Allied MCV",
+        "Index": 1
       },
       {
-        "Name": "Allied Amphibious Transport"
+        "Name": "Allied Amphibious Transport",
+        "Index": 1
       },
       {
-        "Name": "Destoryer"
+        "Name": "Destoryer",
+        "Index": 1
       },
       {
-        "Name": "Dolphin"
+        "Name": "Dolphin",
+        "Index": 1
       },
       {
-        "Name": "Aegis Cruiser"
+        "Name": "Aegis Cruiser",
+        "Index": 1
       },
       {
-        "Name": "Aircraft Carrier"
+        "Name": "Aircraft Carrier",
+        "Index": 1
       },
       {
-        "Name": "NightHawk Transport"
+        "Name": "NightHawk Transport",
+        "Index": 1
       },
       {
-        "Name": "Tank Destoyer"
+        "Name": "Tank Destoyer",
+        "Index": 1
       },
       {
-        "Name": "Infantry Fighting Vehicle"
+        "Name": "Infantry Fighting Vehicle",
+        "Index": 1
       },
       {
-        "Name": "Allied Attack Dog"
+        "Name": "Allied Attack Dog",
+        "Index": 1
       },
       {
-        "Name": "GI"
+        "Name": "GI",
+        "Index": 1
       },
       {
-        "Name": "Allied Engineer"
+        "Name": "Allied Engineer",
+        "Index": 1
       },
       {
-        "Name": "Chrono Legionnaire"
+        "Name": "Chrono Legionnaire",
+        "Index": 1
       },
       {
-        "Name": "Spy"
+        "Name": "Spy",
+        "Index": 1
       },
       {
-        "Name": "Tanya"
+        "Name": "Tanya",
+        "Index": 1
       },
       {
-        "Name": "Sniper"
+        "Name": "Sniper",
+        "Index": 1
       },
       {
-        "Name": "Rocketeer"
+        "Name": "Rocketeer",
+        "Index": 1
       },
       {
-        "Name": "Harrier"
+        "Name": "Harrier",
+        "Index": 1
       },
       {
-        "Name": "Black Eagle"
+        "Name": "Black Eagle",
+        "Index": 1
       },
       {
-        "Name": "Flak Track"
+        "Name": "Flak Track",
+        "Index": 1
       },
       {
-        "Name": "Tesla Tank"
+        "Name": "Tesla Tank",
+        "Index": 1
       },
       {
-        "Name": "Apocalypse Tank"
+        "Name": "Apocalypse Tank",
+        "Index": 1
       },
       {
-        "Name": "V3 Rocket Launcher"
+        "Name": "V3 Rocket Launcher",
+        "Index": 1
       },
       {
-        "Name": "Terror Drone"
+        "Name": "Terror Drone",
+        "Index": 1
       },
       {
-        "Name": "Giant Squid"
+        "Name": "Giant Squid",
+        "Index": 1
       },
       {
-        "Name": "Kirov Airship"
+        "Name": "Kirov Airship",
+        "Index": 1
       },
       {
-        "Name": "Soviet MCV"
+        "Name": "Soviet MCV",
+        "Index": 1
       },
       {
-        "Name": "Dreadnought"
+        "Name": "Dreadnought",
+        "Index": 1
       },
       {
-        "Name": "Typhoon Attack Submarine"
+        "Name": "Typhoon Attack Submarine",
+        "Index": 1
       },
       {
-        "Name": "Sea Scorpion"
+        "Name": "Sea Scorpion",
+        "Index": 1
       },
       {
-        "Name": "Soviet Amphibious Transport"
+        "Name": "Soviet Amphibious Transport",
+        "Index": 1
       },
       {
-        "Name": "Demolition Truck"
+        "Name": "Demolition Truck",
+        "Index": 1
       },
       {
-        "Name": "Soviet Attack Dog"
+        "Name": "Soviet Attack Dog",
+        "Index": 1
       },
       {
-        "Name": "Conscript"
+        "Name": "Conscript",
+        "Index": 1
       },
       {
-        "Name": "Soviet Engineer"
+        "Name": "Soviet Engineer",
+        "Index": 1
       },
       {
-        "Name": "Tesla Trooper"
+        "Name": "Tesla Trooper",
+        "Index": 1
       },
       {
-        "Name": "Crazy Ivan"
+        "Name": "Crazy Ivan",
+        "Index": 1
       },
       {
-        "Name": "Yuri"
+        "Name": "Yuri",
+        "Index": 1
       },
       {
-        "Name": "Desolator"
+        "Name": "Desolator",
+        "Index": 1
       },
       {
-        "Name": "Terrorist"
+        "Name": "Terrorist",
+        "Index": 1
       }
     ],
     "StructureTabView": [],

@@ -7,7 +7,6 @@
 
 #include "./Constants.hpp"
 #include "./Datatypes.hpp"
-#include "./FileIO.hpp"
 #include "./json.hpp"
 
 using json = nlohmann::json;
@@ -16,25 +15,16 @@ namespace Ra2ob {
 
 class Viewer {
 public:
-    explicit Viewer(std::string jsonFile = F_VIEW);
+    Viewer();
     ~Viewer();
 
-    void loadViewFromJson(std::string jsonFile);
     json exportJson(tagGameInfo gi, int mode = 0);
     void print(tagGameInfo gi, int mode = 0, int indent = 0);
     std::string uint32ToHex(uint32_t num);
     std::vector<std::string> vecToHex(std::vector<uint32_t> source);
 };
 
-Viewer::Viewer(std::string jsonFile) { loadViewFromJson(jsonFile); }
-
-void Viewer::loadViewFromJson(std::string jsonFile) {
-    FileIO fio;
-
-    json data = fio.readJson(jsonFile);
-
-    // Todo: complete.
-}
+Viewer::Viewer() {}
 
 /**
  * mode 0 - brief, 1 - full, 2 - debug
