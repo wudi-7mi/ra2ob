@@ -14,7 +14,7 @@ using json = nlohmann::json;
 
 namespace Ra2ob {
 
-json readJsonFromFile(std::string filePath) {
+inline json readJsonFromFile(std::string filePath) {
     std::ifstream f(filePath);
     json j;
 
@@ -28,7 +28,7 @@ json readJsonFromFile(std::string filePath) {
     return j;
 }
 
-std::string utf16ToGbk(const wchar_t* src_wstr) {
+inline std::string utf16ToGbk(const wchar_t* src_wstr) {
     int len = WideCharToMultiByte(CP_ACP, 0, src_wstr, -1, nullptr, 0, nullptr, nullptr);
 
     std::vector<char> str(len);
@@ -38,7 +38,7 @@ std::string utf16ToGbk(const wchar_t* src_wstr) {
     return std::string(str.begin(), str.end() - 1);
 }
 
-std::string utf16ToUtf8(const wchar_t* src_wstr) {
+inline std::string utf16ToUtf8(const wchar_t* src_wstr) {
     int len = WideCharToMultiByte(CP_UTF8, 0, src_wstr, -1, nullptr, 0, nullptr, nullptr);
 
     std::vector<char> str(len);

@@ -23,12 +23,12 @@ public:
     std::vector<std::string> vecToHex(std::vector<uint32_t> source);
 };
 
-Viewer::Viewer() {}
+inline Viewer::Viewer() {}
 
 /**
  * mode 0 - brief, 1 - full, 2 - debug
  */
-json Viewer::exportJson(tagGameInfo gi, int mode) {
+inline json Viewer::exportJson(tagGameInfo gi, int mode) {
     json j;
 
     if (mode > 0) {
@@ -87,7 +87,7 @@ json Viewer::exportJson(tagGameInfo gi, int mode) {
 /**
  * mode 0 - brief, 1 - full, 2 - debug
  */
-void Viewer::print(tagGameInfo gi, int mode, int indent) {
+inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     if (mode == 2) {
         json j;
 
@@ -144,13 +144,13 @@ void Viewer::print(tagGameInfo gi, int mode, int indent) {
     }
 }
 
-std::string Viewer::uint32ToHex(uint32_t num) {
+inline std::string Viewer::uint32ToHex(uint32_t num) {
     std::stringstream ss;
     ss << std::hex << num;
     return ss.str();
 }
 
-std::vector<std::string> Viewer::vecToHex(std::vector<uint32_t> source) {
+inline std::vector<std::string> Viewer::vecToHex(std::vector<uint32_t> source) {
     std::vector<std::string> ret;
 
     for (auto& it : source) {
@@ -160,7 +160,7 @@ std::vector<std::string> Viewer::vecToHex(std::vector<uint32_t> source) {
     return ret;
 }
 
-Viewer::~Viewer() {}
+inline Viewer::~Viewer() {}
 
 }  // namespace Ra2ob
 

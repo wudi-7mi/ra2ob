@@ -77,12 +77,12 @@ private:
     ~Game();
 };
 
-Game& Game::getInstance() {
+inline Game& Game::getInstance() {
     static Game instance;
     return instance;
 }
 
-Game::Game() {
+inline Game::Game() {
     loadNumericsFromJson();
     loadUnitsFromJson();
     initStrTypes();
@@ -90,7 +90,7 @@ Game::Game() {
     initGameInfo();
 }
 
-Game::~Game() {
+inline Game::~Game() {
     if (r.getHandle() != nullptr) {
         CloseHandle(r.getHandle());
     }
@@ -99,7 +99,7 @@ Game::~Game() {
 /**
  * Get game handle, set Reader.
  */
-void Game::getHandle() {
+inline void Game::getHandle() {
     DWORD pid = 0;
 
     std::wstring w_name = L"gamemd-spawn.exe";
@@ -183,7 +183,7 @@ void Game::getHandle() {
 /**
  * Initialize all the addresses.
  */
-void Game::initAddrs() {
+inline void Game::initAddrs() {
     if (nullptr == r.getHandle()) {
         std::cerr << "No valid process handle, call Game::getHandle() first.\n";
     }
@@ -218,7 +218,7 @@ void Game::initAddrs() {
     }
 }
 
-void Game::loadNumericsFromJson(std::string filePath) {
+inline void Game::loadNumericsFromJson(std::string filePath) {
     json data = readJsonFromFile(filePath);
 
     _numerics.items.clear();
@@ -231,7 +231,7 @@ void Game::loadNumericsFromJson(std::string filePath) {
     }
 }
 
-void Game::loadUnitsFromJson(std::string filePath) {
+inline void Game::loadUnitsFromJson(std::string filePath) {
     json data = readJsonFromFile(filePath);
 
     _units.items.clear();
@@ -265,12 +265,12 @@ void Game::loadUnitsFromJson(std::string filePath) {
     }
 }
 
-void Game::initStrTypes() {
+inline void Game::initStrTypes() {
     _strName    = StrName();
     _strCountry = StrCountry();
 }
 
-void Game::initVectors() {
+inline void Game::initVectors() {
     _players     = std::vector<bool>(MAXPLAYER, false);
     _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
 
@@ -289,7 +289,7 @@ void Game::initVectors() {
     _colors        = std::vector<std::string>(MAXPLAYER, "0x000000");
 }
 
-void Game::initGameInfo() {
+inline void Game::initGameInfo() {
     _gameInfo.players            = std::vector<tagPlayer>(MAXPLAYER, tagPlayer());
     _gameInfo.debug.playerBase   = std::vector<uint32_t>(MAXPLAYER, 0);
     _gameInfo.debug.buildingBase = std::vector<uint32_t>(MAXPLAYER, 0);
@@ -302,7 +302,7 @@ void Game::initGameInfo() {
 /**
  * Return valid player number.
  */
-int Game::hasPlayer() {
+inline int Game::hasPlayer() {
     int count = 0;
 
     for (bool it : _players) {
@@ -320,7 +320,7 @@ int Game::hasPlayer() {
 /**
  * Fetch the data in all the base class.
  */
-void Game::refreshInfo() {
+inline void Game::refreshInfo() {
     if (!hasPlayer()) {
         std::cerr << "No valid player to show info.\n";
         _gameInfo.valid = false;
@@ -350,7 +350,7 @@ void Game::refreshInfo() {
     refreshColors();
 }
 
-void Game::refreshBuildingInfos() {
+inline void Game::refreshBuildingInfos() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
@@ -379,7 +379,7 @@ void Game::refreshBuildingInfos() {
     }
 }
 
-void Game::refreshColors() {
+inline void Game::refreshColors() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
@@ -396,7 +396,7 @@ void Game::refreshColors() {
     }
 }
 
-void Game::structBuild() {
+inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {
         tagPlayer p;
 
@@ -443,7 +443,7 @@ void Game::structBuild() {
     }
 }
 
-void Game::restart() {
+inline void Game::restart() {
     if (r.getHandle() != nullptr) {
         CloseHandle(r.getHandle());
     }
@@ -455,7 +455,7 @@ void Game::restart() {
     initGameInfo();
 }
 
-void Game::startLoop() {
+inline void Game::startLoop() {
     std::thread d_thread(std::bind(&Game::detectTask, this, 1000));
 
     std::thread f_thread(std::bind(&Game::fetchTask, this, 500));
@@ -464,7 +464,7 @@ void Game::startLoop() {
     f_thread.detach();
 }
 
-void Game::detectTask(int interval) {
+inline void Game::detectTask(int interval) {
     while (true) {
         getHandle();
         if (r.getHandle() != nullptr) {
@@ -478,7 +478,7 @@ void Game::detectTask(int interval) {
     }
 }
 
-void Game::fetchTask(int interval) {
+inline void Game::fetchTask(int interval) {
     while (true) {
         if (_gameInfo.valid) {
             refreshInfo();

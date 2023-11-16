@@ -161,31 +161,31 @@ struct tagUnits {
  * Source Code
  */
 
-Base::Base(std::string name, uint32_t offset) {
+inline Base::Base(std::string name, uint32_t offset) {
     m_name   = name;
     m_offset = offset;
     m_value  = std::vector<uint32_t>(MAXPLAYER, 0);
     m_size   = NUMSIZE;
 }
 
-Base::~Base() {}
+inline Base::~Base() {}
 
-std::string Base::getName() { return m_name; }
+inline std::string Base::getName() { return m_name; }
 
-uint32_t Base::getValueByIndex(int index) {
+inline uint32_t Base::getValueByIndex(int index) {
     if (validIndex(index)) {
         return m_value[index];
     }
     return -1;
 }
 
-void Base::setValueByIndex(int index, uint32_t value) {
+inline void Base::setValueByIndex(int index, uint32_t value) {
     if (validIndex(index)) {
         m_value[index] = value;
     }
 }
 
-void Base::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
+inline void Base::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
@@ -198,7 +198,7 @@ void Base::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
     }
 }
 
-bool Base::validIndex(int index) {
+inline bool Base::validIndex(int index) {
     if (index >= MAXPLAYER) {
         std::cerr << "Error: Index cannot be larger than MAXPLAYER.\n";
         return false;
@@ -206,15 +206,18 @@ bool Base::validIndex(int index) {
     return true;
 }
 
-Numeric::Numeric(std::string name, uint32_t offset) : Base(name, offset) {}
+inline Numeric::Numeric(std::string name, uint32_t offset) : Base(name, offset) {}
 
-Numeric::~Numeric() {}
+inline Numeric::~Numeric() {}
 
-Unit::Unit(std::string name, uint32_t offset, UnitType ut) : Base(name, offset) { m_unitType = ut; }
+inline Unit::Unit(std::string name, uint32_t offset, UnitType ut) : Base(name, offset) {
+    m_unitType = ut;
+}
 
-Unit::~Unit() {}
+inline Unit::~Unit() {}
 
-void Unit::fetchData(Reader r, std::vector<uint32_t> baseOffsets, std::vector<uint32_t> valids) {
+inline void Unit::fetchData(Reader r, std::vector<uint32_t> baseOffsets,
+                            std::vector<uint32_t> valids) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
@@ -232,17 +235,17 @@ void Unit::fetchData(Reader r, std::vector<uint32_t> baseOffsets, std::vector<ui
     }
 }
 
-UnitType Unit::getUnitType() { return m_unitType; }
+inline UnitType Unit::getUnitType() { return m_unitType; }
 
-StrName::StrName(std::string name, uint32_t offset) : Base(name, offset) {
+inline StrName::StrName(std::string name, uint32_t offset) : Base(name, offset) {
     m_value     = std::vector<std::string>(MAXPLAYER, "");
     m_value_utf = std::vector<std::string>(MAXPLAYER, "");
     m_size      = STRNAMESIZE;
 }
 
-StrName::~StrName() {}
+inline StrName::~StrName() {}
 
-void StrName::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
+inline void StrName::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
@@ -256,33 +259,33 @@ void StrName::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
     }
 }
 
-std::string StrName::getValueByIndexUtf(int index) {
+inline std::string StrName::getValueByIndexUtf(int index) {
     if (validIndex(index)) {
         return m_value_utf[index];
     }
     return "";
 }
 
-std::string StrName::getValueByIndex(int index) {
+inline std::string StrName::getValueByIndex(int index) {
     if (validIndex(index)) {
         return m_value[index];
     }
     return "";
 }
 
-void StrName::setValueByIndex(int index, std::string value) {
+inline void StrName::setValueByIndex(int index, std::string value) {
     if (validIndex(index)) {
         m_value[index] = value;
     }
 }
 
-StrCountry::StrCountry(std::string name, uint32_t offset) : StrName(name, offset) {
+inline StrCountry::StrCountry(std::string name, uint32_t offset) : StrName(name, offset) {
     m_size = STRCOUNTRYSIZE;
 }
 
-StrCountry::~StrCountry() {}
+inline StrCountry::~StrCountry() {}
 
-void StrCountry::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
+inline void StrCountry::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
     for (int i = 0; i < baseOffsets.size(); i++) {
         if (baseOffsets[i] == 0) {
             continue;
