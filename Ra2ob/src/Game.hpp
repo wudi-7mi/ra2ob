@@ -6,9 +6,6 @@
 #include <thread>  // NOLINT
 #include <vector>
 
-#include "./Constants.hpp"
-#include "./Datatypes.hpp"
-#include "./Utils.hpp"
 #include "./Viewer.hpp"
 
 // clang-format off
