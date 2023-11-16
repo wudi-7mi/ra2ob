@@ -52,7 +52,7 @@ json Viewer::exportJson(tagGameInfo gi, int mode) {
             continue;
         }
 
-        jp["panel"]["playerName"]  = p.panel.playerName;
+        jp["panel"]["playerName"]  = p.panel.playerNameUtf;
         jp["panel"]["balance"]     = p.panel.balance;
         jp["panel"]["creditSpent"] = p.panel.creditSpent;
         jp["panel"]["powerDrain"]  = p.panel.powerDrain;
@@ -89,12 +89,59 @@ json Viewer::exportJson(tagGameInfo gi, int mode) {
  * mode 0 - brief, 1 - full, 2 - debug
  */
 void Viewer::print(tagGameInfo gi, int mode, int indent) {
-    json j = exportJson(gi, mode);
+    if (mode == 2) {
+        json j;
 
-    if (indent == 0) {
+        j["debug"]["playerBase"]   = vecToHex(gi.debug.playerBase);
+        j["debug"]["buildingBase"] = vecToHex(gi.debug.buildingBase);
+        j["debug"]["infantryBase"] = vecToHex(gi.debug.infantryBase);
+        j["debug"]["tankBase"]     = vecToHex(gi.debug.tankBase);
+        j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
+        j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
+
         std::cout << j.dump() << std::endl;
-    } else {
-        std::cout << j.dump(indent) << std::endl;
+        return;
+    }
+
+    for (auto& p : gi.players) {
+        if (mode == 0 && !p.valid) {
+            continue;
+        }
+
+        int cval = std::stoi(p.panel.color, 0, 16);
+
+        std::cout << p.panel.playerName;
+
+        if (COLORMAP.find(cval) == COLORMAP.end()) {
+            std::cout << " ";
+        } else {
+            std::cout << " " << COLORMAP.at(cval) << "  " << STYLE_OFF;
+        }
+
+        std::cout << " " << p.panel.country;
+        std::cout << " Balance: " << p.panel.balance;
+        std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
+        std::cout << " Credit: " << p.panel.creditSpent;
+
+        std::cout << "\n";
+
+        for (auto& u : p.units.units) {
+            if (mode == 0 && u.num == 0) {
+                continue;
+            }
+
+            std::cout << u.unitName << ": " << u.num;
+
+            if (mode == 1) {
+                std::cout << " index=" << u.index;
+            }
+
+            std::cout << "\n";
+        }
+
+        // Todo: Add buildings.
+
+        std::cout << STR_RULER << std::endl;
     }
 }
 

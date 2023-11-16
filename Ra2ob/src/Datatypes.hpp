@@ -10,17 +10,19 @@
 #include <vector>
 
 #include "./Reader.hpp"
+#include "./Utils.hpp"
 
 namespace Ra2ob {
 
 struct tagPanelInfo {
-    std::string playerName = "";
-    int balance            = 0;
-    int creditSpent        = 0;
-    int powerDrain         = 0;
-    int powerOutput        = 0;
-    std::string color      = "#FFFFFF";
-    std::string country    = "";
+    std::string playerName    = "";
+    std::string playerNameUtf = "";
+    int balance               = 0;
+    int creditSpent           = 0;
+    int powerDrain            = 0;
+    int powerOutput           = 0;
+    std::string color         = "#FFFFFF";
+    std::string country       = "";
 };
 
 struct tagUnitSingle {
@@ -114,11 +116,13 @@ public:
     ~StrName();
 
     std::string getValueByIndex(int index);
+    std::string getValueByIndexUtf(int index);
     void setValueByIndex(int index, std::string value);
     void fetchData(Reader r, std::vector<uint32_t> baseOffsets);
 
 protected:
     std::vector<std::string> m_value;
+    std::vector<std::string> m_value_utf;
 };
 
 class StrCountry : public StrName {
@@ -231,8 +235,9 @@ void Unit::fetchData(Reader r, std::vector<uint32_t> baseOffsets, std::vector<ui
 UnitType Unit::getUnitType() { return m_unitType; }
 
 StrName::StrName(std::string name, uint32_t offset) : Base(name, offset) {
-    m_value = std::vector<std::string>(MAXPLAYER, "");
-    m_size  = STRNAMESIZE;
+    m_value     = std::vector<std::string>(MAXPLAYER, "");
+    m_value_utf = std::vector<std::string>(MAXPLAYER, "");
+    m_size      = STRNAMESIZE;
 }
 
 StrName::~StrName() {}
@@ -244,11 +249,18 @@ void StrName::fetchData(Reader r, std::vector<uint32_t> baseOffsets) {
         }
 
         wchar_t buf[STRNAMESIZE] = L"";
-
         r.readMemory(baseOffsets[i] + m_offset, &buf, m_size);
-        std::wstring_convert<std::codecvt_utf8<wchar_t>> convert;
-        m_value[i] = convert.to_bytes(buf);
+
+        m_value[i]     = utf16ToGbk(buf);
+        m_value_utf[i] = utf16ToUtf8(buf);
     }
+}
+
+std::string StrName::getValueByIndexUtf(int index) {
+    if (validIndex(index)) {
+        return m_value_utf[index];
+    }
+    return "";
 }
 
 std::string StrName::getValueByIndex(int index) {

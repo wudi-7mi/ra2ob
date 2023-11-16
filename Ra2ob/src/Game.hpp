@@ -8,7 +8,7 @@
 
 #include "./Constants.hpp"
 #include "./Datatypes.hpp"
-#include "./FileIO.hpp"
+#include "./Utils.hpp"
 #include "./Viewer.hpp"
 
 // clang-format off
@@ -72,7 +72,6 @@ public:
 
     std::vector<uint32_t> _houseTypes;
 
-    FileIO fio;
     Reader r;
     Viewer viewer;
 
@@ -223,7 +222,7 @@ void Game::initAddrs() {
 }
 
 void Game::loadNumericsFromJson(std::string filePath) {
-    json data = fio.readJson(filePath);
+    json data = readJsonFromFile(filePath);
 
     _numerics.items.clear();
 
@@ -236,7 +235,7 @@ void Game::loadNumericsFromJson(std::string filePath) {
 }
 
 void Game::loadUnitsFromJson(std::string filePath) {
-    json data = fio.readJson(filePath);
+    json data = readJsonFromFile(filePath);
 
     _units.items.clear();
 
@@ -412,13 +411,14 @@ void Game::structBuild() {
 
         // Panel info
         tagPanelInfo pi;
-        pi.playerName  = _strName.getValueByIndex(i);
-        pi.balance     = _numerics.getItem("Balance").getValueByIndex(i);
-        pi.creditSpent = _numerics.getItem("Credit Spent").getValueByIndex(i);
-        pi.powerDrain  = _numerics.getItem("Power Drain").getValueByIndex(i);
-        pi.powerOutput = _numerics.getItem("Power Output").getValueByIndex(i);
-        pi.color       = _colors[i];
-        pi.country     = _strCountry.getValueByIndex(i);
+        pi.playerName    = _strName.getValueByIndex(i);
+        pi.playerNameUtf = _strName.getValueByIndexUtf(i);
+        pi.balance       = _numerics.getItem("Balance").getValueByIndex(i);
+        pi.creditSpent   = _numerics.getItem("Credit Spent").getValueByIndex(i);
+        pi.powerDrain    = _numerics.getItem("Power Drain").getValueByIndex(i);
+        pi.powerOutput   = _numerics.getItem("Power Output").getValueByIndex(i);
+        pi.color         = _colors[i];
+        pi.country       = _strCountry.getValueByIndex(i);
 
         // Units info
         tagUnitsInfo ui;
