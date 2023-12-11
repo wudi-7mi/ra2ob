@@ -94,7 +94,7 @@ protected:
 
 class Numeric : public Base {
 public:
-    Numeric(std::string name, uint32_t offset);
+    using Base::Base;
     ~Numeric();
 };
 
@@ -205,8 +205,6 @@ inline bool Base::validIndex(int index) {
     }
     return true;
 }
-
-inline Numeric::Numeric(std::string name, uint32_t offset) : Base(name, offset) {}
 
 inline Numeric::~Numeric() {}
 
