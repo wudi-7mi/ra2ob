@@ -1,6 +1,7 @@
 #ifndef RA2OB_SRC_GAME_HPP_
 #define RA2OB_SRC_GAME_HPP_
 
+#include <array>
 #include <sstream>
 #include <string>
 #include <thread>  // NOLINT
@@ -27,7 +28,7 @@ public:
     void loadNumericsFromJson(std::string filePath = F_PANELOFFSETS);
     void loadUnitsFromJson(std::string filePath = F_UNITOFFSETS);
     void initStrTypes();
-    void initVectors();
+    void initArrays();
     void initGameInfo();
 
     int hasPlayer();
@@ -51,23 +52,24 @@ public:
     StrName _strName;
     StrCountry _strCountry;
 
-    std::vector<tagBuildingInfo> _buildingInfos;
-    std::vector<std::string> _colors;
+    std::array<tagBuildingInfo, MAXPLAYER> _buildingInfos;
 
-    std::vector<bool> _players;
-    std::vector<uint32_t> _playerBases;
+    std::array<std::string, MAXPLAYER> _colors;
 
-    std::vector<uint32_t> _buildings;
-    std::vector<uint32_t> _infantrys;
-    std::vector<uint32_t> _tanks;
-    std::vector<uint32_t> _aircrafts;
+    std::array<bool, MAXPLAYER> _players;
+    std::array<uint32_t, MAXPLAYER> _playerBases;
 
-    std::vector<uint32_t> _buildings_valid;
-    std::vector<uint32_t> _infantrys_valid;
-    std::vector<uint32_t> _tanks_valid;
-    std::vector<uint32_t> _aircrafts_valid;
+    std::array<uint32_t, MAXPLAYER> _buildings;
+    std::array<uint32_t, MAXPLAYER> _infantrys;
+    std::array<uint32_t, MAXPLAYER> _tanks;
+    std::array<uint32_t, MAXPLAYER> _aircrafts;
 
-    std::vector<uint32_t> _houseTypes;
+    std::array<uint32_t, MAXPLAYER> _buildings_valid;
+    std::array<uint32_t, MAXPLAYER> _infantrys_valid;
+    std::array<uint32_t, MAXPLAYER> _tanks_valid;
+    std::array<uint32_t, MAXPLAYER> _aircrafts_valid;
+
+    std::array<uint32_t, MAXPLAYER> _houseTypes;
 
     Reader r;
     Viewer viewer;
@@ -86,7 +88,7 @@ inline Game::Game() {
     loadNumericsFromJson();
     loadUnitsFromJson();
     initStrTypes();
-    initVectors();
+    initArrays();
     initGameInfo();
 }
 
@@ -270,33 +272,34 @@ inline void Game::initStrTypes() {
     _strCountry = StrCountry();
 }
 
-inline void Game::initVectors() {
-    _players     = std::vector<bool>(MAXPLAYER, false);
-    _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
+inline void Game::initArrays() {
+    _players     = std::array<bool, MAXPLAYER>{};
+    _playerBases = std::array<uint32_t, MAXPLAYER>{};
 
-    _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildings = std::array<uint32_t, MAXPLAYER>{};
+    _infantrys = std::array<uint32_t, MAXPLAYER>{};
+    _tanks     = std::array<uint32_t, MAXPLAYER>{};
+    _aircrafts = std::array<uint32_t, MAXPLAYER>{};
 
-    _buildings_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks_valid     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildings_valid = std::array<uint32_t, MAXPLAYER>{};
+    _infantrys_valid = std::array<uint32_t, MAXPLAYER>{};
+    _tanks_valid     = std::array<uint32_t, MAXPLAYER>{};
+    _aircrafts_valid = std::array<uint32_t, MAXPLAYER>{};
 
-    _houseTypes    = std::vector<uint32_t>(MAXPLAYER, 0);
-    _buildingInfos = std::vector<tagBuildingInfo>(MAXPLAYER, tagBuildingInfo());
-    _colors        = std::vector<std::string>(MAXPLAYER, "0x000000");
+    _houseTypes    = std::array<uint32_t, MAXPLAYER>{};
+    _buildingInfos = std::array<tagBuildingInfo, MAXPLAYER>{};
+    _colors        = std::array<std::string, MAXPLAYER>{};
+    _colors.fill("0x000000");
 }
 
 inline void Game::initGameInfo() {
-    _gameInfo.players            = std::vector<tagPlayer>(MAXPLAYER, tagPlayer());
-    _gameInfo.debug.playerBase   = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.buildingBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.infantryBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.tankBase     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.aircraftBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.houseType    = std::vector<uint32_t>(MAXPLAYER, 0);
+    _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
+    _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.infantryBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.tankBase     = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.aircraftBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.houseType    = std::array<uint32_t, MAXPLAYER>{};
 }
 
 /**
@@ -455,7 +458,7 @@ inline void Game::restart(bool valid) {
     std::cout << "Handle Closed.\n";
 
     initStrTypes();
-    initVectors();
+    initArrays();
     initGameInfo();
 }
 

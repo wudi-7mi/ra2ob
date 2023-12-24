@@ -20,7 +20,7 @@ public:
     json exportJson(tagGameInfo gi, int mode = 0);
     void print(tagGameInfo gi, int mode = 0, int indent = 0);
     std::string uint32ToHex(uint32_t num);
-    std::vector<std::string> vecToHex(std::vector<uint32_t> source);
+    std::array<std::string, MAXPLAYER> vecToHex(const std::array<uint32_t, MAXPLAYER>& source);
 };
 
 inline Viewer::Viewer() {}
@@ -56,7 +56,7 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
         jp["panel"]["creditSpent"] = p.panel.creditSpent;
         jp["panel"]["powerDrain"]  = p.panel.powerDrain;
         jp["panel"]["powerOutput"] = p.panel.powerOutput;
-        jp["panel"]["color"]       = p.panel.color;
+        jp["panel"]["color"]       = "#" + p.panel.color;
         jp["panel"]["country"]     = p.panel.country;
 
         for (auto& u : p.units.units) {
@@ -150,11 +150,12 @@ inline std::string Viewer::uint32ToHex(uint32_t num) {
     return ss.str();
 }
 
-inline std::vector<std::string> Viewer::vecToHex(std::vector<uint32_t> source) {
-    std::vector<std::string> ret;
+inline std::array<std::string, MAXPLAYER> Viewer::vecToHex(
+    const std::array<uint32_t, MAXPLAYER>& source) {
+    std::array<std::string, MAXPLAYER> ret{};
 
-    for (auto& it : source) {
-        ret.push_back(uint32ToHex(it));
+    for (int i = 0; i < source.size(); i++) {
+        ret[i] = uint32ToHex(source[i]);
     }
 
     return ret;

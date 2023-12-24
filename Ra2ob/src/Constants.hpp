@@ -116,7 +116,8 @@ const std::map<int, std::string> COLORMAP = {
 const std::map<std::string, std::string> COUNTRYMAP = {
     {"Americans", "Americans"}, {"Alliance", "Korea"},    {"French", "France"},
     {"Germans", "Germans"},     {"British", "British"},   {"Africans", "Libya"},
-    {"Arabs", "Iraq"},          {"Russians", "Russians"}, {"Confederation", "Cuba"}};
+    {"Arabs", "Iraq"},          {"Russians", "Russians"}, {"Confederation", "Cuba"},
+};
 
 // Enums
 
