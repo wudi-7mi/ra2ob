@@ -25,8 +25,12 @@
       "Offset": "0x5c"
     },
     {
-      "Name": "Grand Cannon",
-      "Offset": "0x100"
+      "Name": "Yuri War Factory",
+      "Offset": "0x4bc"
+    },
+    {
+      "Name": "Slave Miner Deployed",
+      "Offset": "0x594"
     }
   ],
   "Tank": [
@@ -91,6 +95,10 @@
       "Offset": "0xa4"
     },
     {
+      "Name": "Siege chopper",
+      "Offset": "0x10c"
+    },
+    {
       "Name": "Chrono Miner",
       "Offset": "0x84"
     },
@@ -141,6 +149,54 @@
     {
       "Name": "Infantry Fighting Vehicle",
       "Offset": "0x98"
+    },
+    {
+      "Name": "Battle Fortress",
+      "Offset": "0xf4"
+    },
+    {
+      "Name": "Robot Tank",
+      "Offset": "0x120"
+    },
+    {
+      "Name": "Lasher Tank",
+      "Offset": "0x7c"
+    },
+    {
+      "Name": "Slave Miner",
+      "Offset": "0xe4"
+    },
+    {
+      "Name": "Gattling Tank",
+      "Offset": "0xf0"
+    },
+    {
+      "Name": "Magnetron",
+      "Offset": "0xf8"
+    },
+    {
+      "Name": "Chaos Drone",
+      "Offset": "0xfc"
+    },
+    {
+      "Name": "Mastermind",
+      "Offset": "0x114"
+    },
+    {
+      "Name": "Yuri MCV",
+      "Offset": "0xe0"
+    },
+    {
+      "Name": "Yuri Amphibious Transport",
+      "Offset": "0xdc"
+    },
+    {
+      "Name": "Boomer",
+      "Offset": "0x108"
+    },
+    {
+      "Name": "Floating Disc",
+      "Offset": "0x118"
     }
   ],
   "Infantry": [
@@ -166,7 +222,8 @@
     },
     {
       "Name": "Yuri",
-      "Offset": "0x18"
+      "Offset": "0x18",
+      "Invalid": "yr"
     },
     {
       "Name": "Desolator",
@@ -179,6 +236,10 @@
     {
       "Name": "Flak Trooper",
       "Offset": "0x5c"
+    },
+    {
+      "Name": "Boris",
+      "Offset": "0xc0"
     },
     {
       "Name": "Allied Attack Dog",
@@ -211,6 +272,55 @@
     {
       "Name": "Rocketeer",
       "Offset": "0x10"
+    },
+    {
+      "Name": "Navy SEAL",
+      "Offset": "0x14"
+    },
+    {
+      "Name": "Guardian GI",
+      "Offset": "0xb8"
+    },
+    {
+      "Name": "Initiate",
+      "Offset": "0xbc"
+    },
+    {
+      "Name": "Virus",
+      "Offset": "0xc8"
+    },
+    {
+      "Name": "Yuri Clone",
+      "Offset": "0x18"
+    },
+    {
+      "Name": "Brute",
+      "Offset": "0xc4"
+    },
+    {
+      "Name": "Yuri Engineer",
+      "Offset": "0xb4"
+    },
+    {
+      "Name": "Yuri X",
+      "Offset": "0x50"
+    },
+    {
+      "Name": "Yuri Prime",
+      "Offset": "0x50",
+      "Invalid": "yr"
+    },
+    {
+      "Name": "Chrono Ivan",
+      "Offset": "0x4c"
+    },
+    {
+      "Name": "Psi Commando",
+      "Offset": "0x48"
+    },
+    {
+      "Name": "Chrono Commando",
+      "Offset": "0x44"
     }
   ],
   "Aircraft": [

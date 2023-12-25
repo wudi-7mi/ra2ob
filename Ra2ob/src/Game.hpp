@@ -73,6 +73,7 @@ public:
 
     Reader r;
     Viewer viewer;
+    Version version = Version::Yr;  // Todo: Auto detect game version.
 
 private:
     Game();
@@ -255,6 +256,10 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
 
         for (auto& u : data[ut.key()]) {
             if (u.empty()) {
+                continue;
+            }
+
+            if (version == Version::Yr && u.contains("Invalid") && u["Invalid"] == "yr") {
                 continue;
             }
 

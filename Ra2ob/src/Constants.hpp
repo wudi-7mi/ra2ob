@@ -60,6 +60,7 @@ constexpr int P_NAMEOFFSET = 0x64;
 // Color Codes
 
 constexpr int C_YELLOW  = 0xE0D838;
+constexpr int C_YELLOW2 = 0xF0F840;
 constexpr int C_PURPLE  = 0x9848B8;
 constexpr int C_GREEN   = 0x58CC50;
 constexpr int C_RED     = 0xF84C48;
@@ -106,9 +107,9 @@ constexpr char STYLE_BG_YELLOW[]    = "\033[103m";
 constexpr char STYLE_BG_WHITE[]     = "\033[107m";
 
 const std::map<int, std::string> COLORMAP = {
-    {C_YELLOW, STYLE_BG_YELLOW},     {C_PURPLE, STYLE_BG_PURPLE}, {C_GREEN, STYLE_BG_GREEN},
-    {C_RED, STYLE_BG_RED},           {C_ORANGE, STYLE_BG_ORANGE}, {C_PINK, STYLE_BG_PINK},
-    {C_SKYBLUE, STYLE_BG_LIGHTBLUE}, {C_BLUE, STYLE_BG_DARKBLUE},
+    {C_YELLOW, STYLE_BG_YELLOW}, {C_YELLOW2, STYLE_BG_YELLOW},    {C_PURPLE, STYLE_BG_PURPLE},
+    {C_GREEN, STYLE_BG_GREEN},   {C_RED, STYLE_BG_RED},           {C_ORANGE, STYLE_BG_ORANGE},
+    {C_PINK, STYLE_BG_PINK},     {C_SKYBLUE, STYLE_BG_LIGHTBLUE}, {C_BLUE, STYLE_BG_DARKBLUE},
 };
 
 // Country Map
@@ -117,11 +118,13 @@ const std::map<std::string, std::string> COUNTRYMAP = {
     {"Americans", "Americans"}, {"Alliance", "Korea"},    {"French", "France"},
     {"Germans", "Germans"},     {"British", "British"},   {"Africans", "Libya"},
     {"Arabs", "Iraq"},          {"Russians", "Russians"}, {"Confederation", "Cuba"},
+    {"YuriCountry", "Yuri"},
 };
 
 // Enums
 
 enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
+enum class Version : int { Yr = 1, Ra2 = 0 };
 
 // Files
 constexpr char F_PANELOFFSETS[] = "./config/panel_offsets.json";
