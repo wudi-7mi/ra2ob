@@ -16,7 +16,7 @@ int main(int argc, char* argv[]) {
     g.startLoop();
 
     while (true) {
-        Sleep(1000);
+        Sleep(Ra2ob::T_PRINTTIME);
 
         if (g._gameInfo.valid) {
             system("cls");

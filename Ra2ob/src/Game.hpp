@@ -468,9 +468,9 @@ inline void Game::restart(bool valid) {
 }
 
 inline void Game::startLoop() {
-    std::thread d_thread(std::bind(&Game::detectTask, this, 1000));
+    std::thread d_thread(std::bind(&Game::detectTask, this, T_DETECTTIME));
 
-    std::thread f_thread(std::bind(&Game::fetchTask, this, 500));
+    std::thread f_thread(std::bind(&Game::fetchTask, this, T_FETCHTIME));
 
     d_thread.detach();
     f_thread.detach();

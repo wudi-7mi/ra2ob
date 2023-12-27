@@ -57,6 +57,12 @@ constexpr int P_STATUSOFFSET      = 0x70;
 
 constexpr int P_NAMEOFFSET = 0x64;
 
+// Time Ints
+
+constexpr int T_DETECTTIME = 1000;
+constexpr int T_FETCHTIME  = 500;
+constexpr int T_PRINTTIME  = 500;
+
 // Color Codes
 
 constexpr int C_YELLOW  = 0xE0D838;
@@ -127,11 +133,13 @@ enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, 
 enum class Version : int { Yr = 1, Ra2 = 0 };
 
 // Files
+
 constexpr char F_PANELOFFSETS[] = "./config/panel_offsets.json";
 constexpr char F_UNITOFFSETS[]  = "./config/unit_offsets.json";
 constexpr char F_VIEW[]         = "./config/view.json";
 
 // Strings
+
 constexpr char STR_RULER[] = "====================================================================";
 
 }  // end of namespace Ra2ob
