@@ -29,7 +29,7 @@ struct tagPanelInfo {
 struct tagUnitSingle {
     std::string unitName = "";
     int num              = 0;
-    int index            = -1;
+    int index            = 99;
 };
 
 struct tagUnitsInfo {
@@ -101,15 +101,17 @@ public:
 
 class Unit : public Base {
 public:
-    Unit(std::string name, uint32_t offset, UnitType ut);
+    Unit(std::string name, uint32_t offset, UnitType ut, int index);
     ~Unit();
 
     UnitType getUnitType();
+    int getUnitIndex();
     void fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& baseOffsets,
                    const std::array<uint32_t, MAXPLAYER>& valids);
 
 protected:
     UnitType m_unitType;
+    int m_unitIndex;
 };
 
 class StrName : public Base {
@@ -209,8 +211,9 @@ inline bool Base::validIndex(int index) {
 
 inline Numeric::~Numeric() {}
 
-inline Unit::Unit(std::string name, uint32_t offset, UnitType ut) : Base(name, offset) {
-    m_unitType = ut;
+inline Unit::Unit(std::string name, uint32_t offset, UnitType ut, int index) : Base(name, offset) {
+    m_unitType  = ut;
+    m_unitIndex = index;
 }
 
 inline Unit::~Unit() {}
@@ -235,6 +238,8 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
 }
 
 inline UnitType Unit::getUnitType() { return m_unitType; }
+
+inline int Unit::getUnitIndex() { return m_unitIndex; }
 
 inline StrName::StrName(std::string name, uint32_t offset) : Base(name, offset) {
     m_size = STRNAMESIZE;

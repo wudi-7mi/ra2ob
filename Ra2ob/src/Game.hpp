@@ -1,6 +1,7 @@
 #ifndef RA2OB_SRC_GAME_HPP_
 #define RA2OB_SRC_GAME_HPP_
 
+#include <algorithm>
 #include <array>
 #include <sstream>
 #include <string>
@@ -266,7 +267,12 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
             std::string offset = u["Offset"];
             uint32_t s_offset  = std::stoul(offset, nullptr, 16);
 
-            Unit ub(u["Name"], s_offset, s_ut);
+            int s_index = 99;
+            if (u.contains("Index")) {
+                s_index = u["Index"];
+            }
+
+            Unit ub(u["Name"], s_offset, s_ut, s_index);
             _units.items.push_back(ub);
         }
     }
@@ -430,9 +436,13 @@ inline void Game::structBuild() {
         for (auto& it : _units.items) {
             tagUnitSingle us;
             us.unitName = it.getName();
+            us.index    = it.getUnitIndex();
             us.num      = it.getValueByIndex(i);
             ui.units.push_back(us);
         }
+
+        std::sort(ui.units.begin(), ui.units.end(),
+                  [](const tagUnitSingle& a, const tagUnitSingle& b) { return a.index < b.index; });
 
         // Players info
         p.valid    = true;

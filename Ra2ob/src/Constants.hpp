@@ -136,7 +136,6 @@ enum class Version : int { Yr = 1, Ra2 = 0 };
 
 constexpr char F_PANELOFFSETS[] = "./config/panel_offsets.json";
 constexpr char F_UNITOFFSETS[]  = "./config/unit_offsets.json";
-constexpr char F_VIEW[]         = "./config/view.json";
 
 // Strings
 
