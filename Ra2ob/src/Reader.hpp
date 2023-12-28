@@ -18,6 +18,7 @@ public:
     bool readMemory(uint32_t addr, void* value, uint32_t size);
     uint32_t getAddr(uint32_t offset);
     int getInt(uint32_t offset);
+    bool getBool(uint32_t offset);
     std::string getString(uint32_t offset);
     uint32_t getColor(uint32_t offset);
 
@@ -25,15 +26,15 @@ protected:
     HANDLE m_handle;
 };
 
-Reader::Reader(HANDLE handle) { m_handle = handle; }
+inline Reader::Reader(HANDLE handle) { m_handle = handle; }
 
-HANDLE Reader::getHandle() { return m_handle; }
+inline HANDLE Reader::getHandle() { return m_handle; }
 
-bool Reader::readMemory(uint32_t addr, void* value, uint32_t size) {
+inline bool Reader::readMemory(uint32_t addr, void* value, uint32_t size) {
     return ReadProcessMemory(m_handle, (const void*)addr, value, size, nullptr);
 }
 
-uint32_t Reader::getAddr(uint32_t offset) {
+inline uint32_t Reader::getAddr(uint32_t offset) {
     uint32_t buf = 0;
 
     if (!readMemory(offset, &buf, 4)) {
@@ -43,7 +44,7 @@ uint32_t Reader::getAddr(uint32_t offset) {
     return buf;
 }
 
-int Reader::getInt(uint32_t offset) {
+inline int Reader::getInt(uint32_t offset) {
     int buf = 0;
 
     if (!readMemory(offset, &buf, 4)) {
@@ -53,7 +54,17 @@ int Reader::getInt(uint32_t offset) {
     return buf;
 }
 
-std::string Reader::getString(uint32_t offset) {
+inline bool Reader::getBool(uint32_t offset) {
+    bool buf = false;
+
+    if (!readMemory(offset, &buf, 1)) {
+        return false;
+    }
+
+    return buf;
+}
+
+inline std::string Reader::getString(uint32_t offset) {
     char buf[STRUNITNAMESIZE] = "\0";
 
     readMemory(offset, &buf, STRUNITNAMESIZE);
@@ -63,7 +74,7 @@ std::string Reader::getString(uint32_t offset) {
     return ret;
 }
 
-uint32_t Reader::getColor(uint32_t offset) {
+inline uint32_t Reader::getColor(uint32_t offset) {
     uint32_t buf = 0;
 
     readMemory(offset, &buf, 3);

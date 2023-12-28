@@ -5,9 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "./Constants.hpp"
 #include "./Datatypes.hpp"
-#include "./FileIO.hpp"
 #include "./json.hpp"
 
 using json = nlohmann::json;
@@ -16,30 +14,21 @@ namespace Ra2ob {
 
 class Viewer {
 public:
-    explicit Viewer(std::string jsonFile = F_VIEW);
+    Viewer();
     ~Viewer();
 
-    void loadViewFromJson(std::string jsonFile);
     json exportJson(tagGameInfo gi, int mode = 0);
     void print(tagGameInfo gi, int mode = 0, int indent = 0);
     std::string uint32ToHex(uint32_t num);
-    std::vector<std::string> vecToHex(std::vector<uint32_t> source);
+    std::array<std::string, MAXPLAYER> vecToHex(const std::array<uint32_t, MAXPLAYER>& source);
 };
 
-Viewer::Viewer(std::string jsonFile) { loadViewFromJson(jsonFile); }
-
-void Viewer::loadViewFromJson(std::string jsonFile) {
-    FileIO fio;
-
-    json data = fio.readJson(jsonFile);
-
-    // Todo: complete.
-}
+inline Viewer::Viewer() {}
 
 /**
  * mode 0 - brief, 1 - full, 2 - debug
  */
-json Viewer::exportJson(tagGameInfo gi, int mode) {
+inline json Viewer::exportJson(tagGameInfo gi, int mode) {
     json j;
 
     if (mode > 0) {
@@ -62,12 +51,12 @@ json Viewer::exportJson(tagGameInfo gi, int mode) {
             continue;
         }
 
-        jp["panel"]["playerName"]  = p.panel.playerName;
+        jp["panel"]["playerName"]  = p.panel.playerNameUtf;
         jp["panel"]["balance"]     = p.panel.balance;
         jp["panel"]["creditSpent"] = p.panel.creditSpent;
         jp["panel"]["powerDrain"]  = p.panel.powerDrain;
         jp["panel"]["powerOutput"] = p.panel.powerOutput;
-        jp["panel"]["color"]       = p.panel.color;
+        jp["panel"]["color"]       = "#" + p.panel.color;
         jp["panel"]["country"]     = p.panel.country;
 
         for (auto& u : p.units.units) {
@@ -98,33 +87,95 @@ json Viewer::exportJson(tagGameInfo gi, int mode) {
 /**
  * mode 0 - brief, 1 - full, 2 - debug
  */
-void Viewer::print(tagGameInfo gi, int mode, int indent) {
-    json j = exportJson(gi, mode);
+inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
+    if (mode == 2) {
+        json j;
 
-    if (indent == 0) {
+        j["debug"]["playerBase"]   = vecToHex(gi.debug.playerBase);
+        j["debug"]["buildingBase"] = vecToHex(gi.debug.buildingBase);
+        j["debug"]["infantryBase"] = vecToHex(gi.debug.infantryBase);
+        j["debug"]["tankBase"]     = vecToHex(gi.debug.tankBase);
+        j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
+        j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
+
         std::cout << j.dump() << std::endl;
-    } else {
-        std::cout << j.dump(indent) << std::endl;
+        return;
+    }
+
+    for (auto& p : gi.players) {
+        if (mode == 0 && !p.valid) {
+            continue;
+        }
+
+        int cval = std::stoi(p.panel.color, 0, 16);
+
+        std::cout << p.panel.playerName;
+
+        if (COLORMAP.find(cval) == COLORMAP.end()) {
+            std::cout << " ";
+        } else {
+            std::cout << " " << COLORMAP.at(cval) << "  " << STYLE_OFF;
+        }
+
+        std::cout << " " << p.panel.country;
+        std::cout << " Balance: " << p.panel.balance;
+        std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
+        std::cout << " Credit: " << p.panel.creditSpent;
+
+        std::cout << "\n";
+
+        for (auto& u : p.units.units) {
+            if (mode == 0 && u.num == 0) {
+                continue;
+            }
+
+            std::cout << u.unitName << ": " << u.num;
+
+            if (mode == 1) {
+                std::cout << " index=" << u.index;
+            }
+
+            std::cout << "\n";
+        }
+
+        if (!p.building.list.empty()) {
+            std::cout << "Producing List: "
+                      << "\n";
+
+            for (auto& b : p.building.list) {
+                std::cout << b.name << " " << b.progress << "/54 ";
+                if (b.status == 1) {
+                    std::cout << "On Hold"
+                              << "\n";
+                } else {
+                    std::cout << "Building"
+                              << "\n";
+                }
+            }
+        }
+
+        std::cout << STR_RULER << std::endl;
     }
 }
 
-std::string Viewer::uint32ToHex(uint32_t num) {
+inline std::string Viewer::uint32ToHex(uint32_t num) {
     std::stringstream ss;
     ss << std::hex << num;
     return ss.str();
 }
 
-std::vector<std::string> Viewer::vecToHex(std::vector<uint32_t> source) {
-    std::vector<std::string> ret;
+inline std::array<std::string, MAXPLAYER> Viewer::vecToHex(
+    const std::array<uint32_t, MAXPLAYER>& source) {
+    std::array<std::string, MAXPLAYER> ret{};
 
-    for (auto& it : source) {
-        ret.push_back(uint32ToHex(it));
+    for (int i = 0; i < source.size(); i++) {
+        ret[i] = uint32ToHex(source[i]);
     }
 
     return ret;
 }
 
-Viewer::~Viewer() {}
+inline Viewer::~Viewer() {}
 
 }  // namespace Ra2ob
 

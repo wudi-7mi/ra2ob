@@ -1,14 +1,13 @@
 #ifndef RA2OB_SRC_GAME_HPP_
 #define RA2OB_SRC_GAME_HPP_
 
+#include <algorithm>
+#include <array>
 #include <sstream>
 #include <string>
 #include <thread>  // NOLINT
 #include <vector>
 
-#include "./Constants.hpp"
-#include "./Datatypes.hpp"
-#include "./FileIO.hpp"
 #include "./Viewer.hpp"
 
 // clang-format off
@@ -30,18 +29,19 @@ public:
     void loadNumericsFromJson(std::string filePath = F_PANELOFFSETS);
     void loadUnitsFromJson(std::string filePath = F_UNITOFFSETS);
     void initStrTypes();
-    void initVectors();
+    void initArrays();
     void initGameInfo();
 
     int hasPlayer();
 
     void refreshInfo();
+    void getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1, UnitType utype);
     void refreshBuildingInfos();
     void refreshColors();
 
     void structBuild();
 
-    void restart();
+    void restart(bool valid);
 
     void detectTask(int interval = 500);
     void fetchTask(int inferval = 500);
@@ -54,47 +54,48 @@ public:
     StrName _strName;
     StrCountry _strCountry;
 
-    std::vector<tagBuildingInfo> _buildingInfos;
-    std::vector<std::string> _colors;
+    std::array<tagBuildingInfo, MAXPLAYER> _buildingInfos;
 
-    std::vector<bool> _players;
-    std::vector<uint32_t> _playerBases;
+    std::array<std::string, MAXPLAYER> _colors;
 
-    std::vector<uint32_t> _buildings;
-    std::vector<uint32_t> _infantrys;
-    std::vector<uint32_t> _tanks;
-    std::vector<uint32_t> _aircrafts;
+    std::array<bool, MAXPLAYER> _players;
+    std::array<uint32_t, MAXPLAYER> _playerBases;
 
-    std::vector<uint32_t> _buildings_valid;
-    std::vector<uint32_t> _infantrys_valid;
-    std::vector<uint32_t> _tanks_valid;
-    std::vector<uint32_t> _aircrafts_valid;
+    std::array<uint32_t, MAXPLAYER> _buildings;
+    std::array<uint32_t, MAXPLAYER> _infantrys;
+    std::array<uint32_t, MAXPLAYER> _tanks;
+    std::array<uint32_t, MAXPLAYER> _aircrafts;
 
-    std::vector<uint32_t> _houseTypes;
+    std::array<uint32_t, MAXPLAYER> _buildings_valid;
+    std::array<uint32_t, MAXPLAYER> _infantrys_valid;
+    std::array<uint32_t, MAXPLAYER> _tanks_valid;
+    std::array<uint32_t, MAXPLAYER> _aircrafts_valid;
 
-    FileIO fio;
+    std::array<uint32_t, MAXPLAYER> _houseTypes;
+
     Reader r;
     Viewer viewer;
+    Version version = Version::Yr;  // Todo: Auto detect game version.
 
 private:
     Game();
     ~Game();
 };
 
-Game& Game::getInstance() {
+inline Game& Game::getInstance() {
     static Game instance;
     return instance;
 }
 
-Game::Game() {
+inline Game::Game() {
     loadNumericsFromJson();
     loadUnitsFromJson();
     initStrTypes();
-    initVectors();
+    initArrays();
     initGameInfo();
 }
 
-Game::~Game() {
+inline Game::~Game() {
     if (r.getHandle() != nullptr) {
         CloseHandle(r.getHandle());
     }
@@ -103,7 +104,7 @@ Game::~Game() {
 /**
  * Get game handle, set Reader.
  */
-void Game::getHandle() {
+inline void Game::getHandle() {
     DWORD pid = 0;
 
     std::wstring w_name = L"gamemd-spawn.exe";
@@ -187,7 +188,7 @@ void Game::getHandle() {
 /**
  * Initialize all the addresses.
  */
-void Game::initAddrs() {
+inline void Game::initAddrs() {
     if (nullptr == r.getHandle()) {
         std::cerr << "No valid process handle, call Game::getHandle() first.\n";
     }
@@ -222,8 +223,8 @@ void Game::initAddrs() {
     }
 }
 
-void Game::loadNumericsFromJson(std::string filePath) {
-    json data = fio.readJson(filePath);
+inline void Game::loadNumericsFromJson(std::string filePath) {
+    json data = readJsonFromFile(filePath);
 
     _numerics.items.clear();
 
@@ -235,8 +236,8 @@ void Game::loadNumericsFromJson(std::string filePath) {
     }
 }
 
-void Game::loadUnitsFromJson(std::string filePath) {
-    json data = fio.readJson(filePath);
+inline void Game::loadUnitsFromJson(std::string filePath) {
+    json data = readJsonFromFile(filePath);
 
     _units.items.clear();
 
@@ -260,53 +261,63 @@ void Game::loadUnitsFromJson(std::string filePath) {
                 continue;
             }
 
+            if (version == Version::Yr && u.contains("Invalid") && u["Invalid"] == "yr") {
+                continue;
+            }
+
             std::string offset = u["Offset"];
             uint32_t s_offset  = std::stoul(offset, nullptr, 16);
 
-            Unit ub(u["Name"], s_offset, s_ut);
+            int s_index = 99;
+            if (u.contains("Index")) {
+                s_index = u["Index"];
+            }
+
+            Unit ub(u["Name"], s_offset, s_ut, s_index);
             _units.items.push_back(ub);
         }
     }
 }
 
-void Game::initStrTypes() {
+inline void Game::initStrTypes() {
     _strName    = StrName();
     _strCountry = StrCountry();
 }
 
-void Game::initVectors() {
-    _players     = std::vector<bool>(MAXPLAYER, false);
-    _playerBases = std::vector<uint32_t>(MAXPLAYER, 0);
+inline void Game::initArrays() {
+    _players     = std::array<bool, MAXPLAYER>{};
+    _playerBases = std::array<uint32_t, MAXPLAYER>{};
 
-    _buildings = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildings = std::array<uint32_t, MAXPLAYER>{};
+    _infantrys = std::array<uint32_t, MAXPLAYER>{};
+    _tanks     = std::array<uint32_t, MAXPLAYER>{};
+    _aircrafts = std::array<uint32_t, MAXPLAYER>{};
 
-    _buildings_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _infantrys_valid = std::vector<uint32_t>(MAXPLAYER, 0);
-    _tanks_valid     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _aircrafts_valid = std::vector<uint32_t>(MAXPLAYER, 0);
+    _buildings_valid = std::array<uint32_t, MAXPLAYER>{};
+    _infantrys_valid = std::array<uint32_t, MAXPLAYER>{};
+    _tanks_valid     = std::array<uint32_t, MAXPLAYER>{};
+    _aircrafts_valid = std::array<uint32_t, MAXPLAYER>{};
 
-    _houseTypes    = std::vector<uint32_t>(MAXPLAYER, 0);
-    _buildingInfos = std::vector<tagBuildingInfo>(MAXPLAYER, tagBuildingInfo());
-    _colors        = std::vector<std::string>(MAXPLAYER, "0x000000");
+    _houseTypes    = std::array<uint32_t, MAXPLAYER>{};
+    _buildingInfos = std::array<tagBuildingInfo, MAXPLAYER>{};
+    _colors        = std::array<std::string, MAXPLAYER>{};
+    _colors.fill("0x000000");
 }
 
-void Game::initGameInfo() {
-    _gameInfo.players            = std::vector<tagPlayer>(MAXPLAYER, tagPlayer());
-    _gameInfo.debug.playerBase   = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.buildingBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.infantryBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.tankBase     = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.aircraftBase = std::vector<uint32_t>(MAXPLAYER, 0);
-    _gameInfo.debug.houseType    = std::vector<uint32_t>(MAXPLAYER, 0);
+inline void Game::initGameInfo() {
+    _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
+    _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.infantryBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.tankBase     = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.aircraftBase = std::array<uint32_t, MAXPLAYER>{};
+    _gameInfo.debug.houseType    = std::array<uint32_t, MAXPLAYER>{};
 }
 
 /**
  * Return valid player number.
  */
-int Game::hasPlayer() {
+inline int Game::hasPlayer() {
     int count = 0;
 
     for (bool it : _players) {
@@ -324,7 +335,7 @@ int Game::hasPlayer() {
 /**
  * Fetch the data in all the base class.
  */
-void Game::refreshInfo() {
+inline void Game::refreshInfo() {
     if (!hasPlayer()) {
         std::cerr << "No valid player to show info.\n";
         _gameInfo.valid = false;
@@ -354,36 +365,58 @@ void Game::refreshInfo() {
     refreshColors();
 }
 
-void Game::refreshBuildingInfos() {
+inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
+                                  UnitType utype) {
+    uint32_t base = r.getAddr(addr + offset_0);
+
+    int currentCD = r.getInt(base + P_TIMEOFFSET);
+    bool status   = r.getBool(base + P_STATUSOFFSET);
+
+    uint32_t current = r.getAddr(base + P_CURRENTOFFSET);
+    uint32_t type    = r.getAddr(current + offset_1);
+    int offset       = r.getInt(type + P_ARRAYINDEXOFFSET);
+
+    auto it =
+        std::find_if(_units.items.begin(), _units.items.end(),
+                     [offset, utype](const Unit& u) { return u.checkOffset(offset * 4, utype); });
+
+    std::string name;
+
+    if (it != _units.items.end()) {
+        name = it->getName();
+
+        tagBuildingNode bn = tagBuildingNode(name);
+
+        bn.progress = currentCD;
+        bn.status   = status;
+
+        bi->list.push_back(bn);
+    }
+}
+
+inline void Game::refreshBuildingInfos() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
         }
 
-        uint32_t addr = _playerBases[i];
-        uint32_t base = r.getAddr(addr + P_INFANTRYOFFSET);
-
-        int currentCD      = r.getInt(base + P_TIMEOFFSET);
-        int status         = r.getInt(base + P_STATUSOFFSET);
-        uint32_t queueAddr = r.getAddr(base + P_QUEUEPTROFFSET);
-        int queueLen       = r.getInt(base + P_QUEUELENGTHOFFSET);
-
         tagBuildingInfo bi;
 
-        for (int j = 0; j < queueLen; j++) {
-            int nodeAddr = r.getAddr(queueAddr + j * 4);
+        uint32_t addr = _playerBases[i];
 
-            std::string name   = r.getString(nodeAddr + P_NAMEOFFSET);
-            tagBuildingNode bn = tagBuildingNode(name);
-
-            bi.list.push_back(bn);
-        }
+        getBuildingInfo(&bi, addr, P_AIRCRAFTOFFSET, P_UNITTYPEOFFSET, UnitType::Aircraft);
+        getBuildingInfo(&bi, addr, P_BUILDINGFIRSTOFFSET, P_BUILDINGTYPEOFFSET, UnitType::Building);
+        getBuildingInfo(&bi, addr, P_BUILDINGSECONDOFFSET, P_BUILDINGTYPEOFFSET,
+                        UnitType::Building);
+        getBuildingInfo(&bi, addr, P_INFANTRYOFFSET, P_INFANTRYTYPEOFFSET, UnitType::Infantry);
+        getBuildingInfo(&bi, addr, P_TANKOFFSET, P_UNITTYPEOFFSET, UnitType::Tank);
+        getBuildingInfo(&bi, addr, P_SHIPOFFSET, P_UNITTYPEOFFSET, UnitType::Tank);
 
         _buildingInfos[i] = bi;
     }
 }
 
-void Game::refreshColors() {
+inline void Game::refreshColors() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
@@ -400,7 +433,7 @@ void Game::refreshColors() {
     }
 }
 
-void Game::structBuild() {
+inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {
         tagPlayer p;
 
@@ -412,22 +445,27 @@ void Game::structBuild() {
 
         // Panel info
         tagPanelInfo pi;
-        pi.playerName  = _strName.getValueByIndex(i);
-        pi.balance     = _numerics.getItem("Balance").getValueByIndex(i);
-        pi.creditSpent = _numerics.getItem("Credit Spent").getValueByIndex(i);
-        pi.powerDrain  = _numerics.getItem("Power Drain").getValueByIndex(i);
-        pi.powerOutput = _numerics.getItem("Power Output").getValueByIndex(i);
-        pi.color       = _colors[i];
-        pi.country     = _strCountry.getValueByIndex(i);
+        pi.playerName    = _strName.getValueByIndex(i);
+        pi.playerNameUtf = _strName.getValueByIndexUtf(i);
+        pi.balance       = _numerics.getItem("Balance").getValueByIndex(i);
+        pi.creditSpent   = _numerics.getItem("Credit Spent").getValueByIndex(i);
+        pi.powerDrain    = _numerics.getItem("Power Drain").getValueByIndex(i);
+        pi.powerOutput   = _numerics.getItem("Power Output").getValueByIndex(i);
+        pi.color         = _colors[i];
+        pi.country       = _strCountry.getValueByIndex(i);
 
         // Units info
         tagUnitsInfo ui;
         for (auto& it : _units.items) {
             tagUnitSingle us;
             us.unitName = it.getName();
+            us.index    = it.getUnitIndex();
             us.num      = it.getValueByIndex(i);
             ui.units.push_back(us);
         }
+
+        std::sort(ui.units.begin(), ui.units.end(),
+                  [](const tagUnitSingle& a, const tagUnitSingle& b) { return a.index < b.index; });
 
         // Players info
         p.valid    = true;
@@ -446,7 +484,11 @@ void Game::structBuild() {
     }
 }
 
-void Game::restart() {
+inline void Game::restart(bool valid) {
+    if (!valid) {
+        return;
+    }
+
     if (r.getHandle() != nullptr) {
         CloseHandle(r.getHandle());
     }
@@ -454,26 +496,27 @@ void Game::restart() {
     std::cout << "Handle Closed.\n";
 
     initStrTypes();
-    initVectors();
+    initArrays();
     initGameInfo();
 }
 
-void Game::startLoop() {
-    std::thread d_thread(std::bind(&Game::detectTask, this, 1000));
+inline void Game::startLoop() {
+    std::thread d_thread(std::bind(&Game::detectTask, this, T_DETECTTIME));
 
-    std::thread f_thread(std::bind(&Game::fetchTask, this, 500));
+    std::thread f_thread(std::bind(&Game::fetchTask, this, T_FETCHTIME));
 
     d_thread.detach();
     f_thread.detach();
 }
 
-void Game::detectTask(int interval) {
+inline void Game::detectTask(int interval) {
     while (true) {
         getHandle();
         if (r.getHandle() != nullptr) {
             _gameInfo.valid = true;
             initAddrs();
         } else {
+            restart(_gameInfo.valid);
             _gameInfo.valid = false;
         }
 
@@ -481,7 +524,7 @@ void Game::detectTask(int interval) {
     }
 }
 
-void Game::fetchTask(int interval) {
+inline void Game::fetchTask(int interval) {
     while (true) {
         if (_gameInfo.valid) {
             refreshInfo();
