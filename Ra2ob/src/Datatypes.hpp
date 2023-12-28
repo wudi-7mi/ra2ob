@@ -30,6 +30,7 @@ struct tagUnitSingle {
     std::string unitName = "";
     int num              = 0;
     int index            = 99;
+    bool show            = false;
 };
 
 struct tagUnitsInfo {
@@ -39,8 +40,8 @@ struct tagUnitsInfo {
 struct tagBuildingNode {
     std::string name;
     int number   = 0;
-    int progress = 0;
-    int status   = 0;  // 0 - building, 1 - stopped.
+    int progress = 0;  // Maximum: 54.
+    int status   = 0;  // 0 - building, 1 - stopped, 2 - ready.
 
     explicit tagBuildingNode(std::string n) { name = n; }
 };
@@ -97,11 +98,12 @@ public:
 
 class Unit : public Base {
 public:
-    Unit(std::string name, uint32_t offset, UnitType ut, int index);
+    Unit(std::string name, uint32_t offset, UnitType ut, int index, bool show);
     ~Unit();
 
     UnitType getUnitType();
     bool checkOffset(int offsetCmp, UnitType type) const;
+    bool checkShow();
     int getUnitIndex();
     void fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& baseOffsets,
                    const std::array<uint32_t, MAXPLAYER>& valids);
@@ -109,6 +111,7 @@ public:
 protected:
     UnitType m_unitType;
     int m_unitIndex;
+    bool m_show;
 };
 
 class StrName : public Base {
@@ -208,9 +211,11 @@ inline bool Base::validIndex(int index) {
 
 inline Numeric::~Numeric() {}
 
-inline Unit::Unit(std::string name, uint32_t offset, UnitType ut, int index) : Base(name, offset) {
+inline Unit::Unit(std::string name, uint32_t offset, UnitType ut, int index, bool show)
+    : Base(name, offset) {
     m_unitType  = ut;
     m_unitIndex = index;
+    m_show      = show;
 }
 
 inline Unit::~Unit() {}
@@ -237,6 +242,8 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
 bool Unit::checkOffset(int offsetCmp, UnitType type) const {
     return (offsetCmp == m_offset && type == m_unitType);
 }
+
+bool Unit::checkShow() { return m_show; }
 
 inline UnitType Unit::getUnitType() { return m_unitType; }
 
