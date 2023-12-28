@@ -50,7 +50,7 @@
       "Invalid": "yr"
     },
     {
-      "Name": "Service Depot",
+      "Name": "Soviet Service Depot",
       "Offset": "0x68",
       "Show": 0
     },
@@ -70,7 +70,7 @@
       "Show": 0
     },
     {
-      "Name": "Tesla Reactor",
+      "Name": "Tesla Coil",
       "Offset": "0xd4",
       "Show": 0
     },
@@ -130,7 +130,7 @@
       "Show": 0
     },
     {
-      "Name": "Airforce Command Headquarters (American)",
+      "Name": "Airforce Command Headquarters",
       "Offset": "0x21c",
       "Show": 0
     },
@@ -234,7 +234,7 @@
       "Show": 0
     },
     {
-      "Name": "Battle Lab",
+      "Name": "Yuri Battle Lab",
       "Offset": "0x4c8",
       "Show": 0
     },
