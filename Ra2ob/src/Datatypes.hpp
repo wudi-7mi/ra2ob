@@ -239,11 +239,11 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
     }
 }
 
-bool Unit::checkOffset(int offsetCmp, UnitType type) const {
+inline bool Unit::checkOffset(int offsetCmp, UnitType type) const {
     return (offsetCmp == m_offset && type == m_unitType);
 }
 
-bool Unit::checkShow() { return m_show; }
+inline bool Unit::checkShow() { return m_show; }
 
 inline UnitType Unit::getUnitType() { return m_unitType; }
 
