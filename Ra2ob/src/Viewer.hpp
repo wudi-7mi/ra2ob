@@ -138,7 +138,21 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             std::cout << "\n";
         }
 
-        // Todo: Add buildings.
+        if (!p.building.list.empty()) {
+            std::cout << "Producing List: "
+                      << "\n";
+
+            for (auto& b : p.building.list) {
+                std::cout << b.name << " " << b.progress << "/54 ";
+                if (b.status == 1) {
+                    std::cout << "On Hold"
+                              << "\n";
+                } else {
+                    std::cout << "Building"
+                              << "\n";
+                }
+            }
+        }
 
         std::cout << STR_RULER << std::endl;
     }

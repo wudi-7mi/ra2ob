@@ -35,6 +35,7 @@ public:
     int hasPlayer();
 
     void refreshInfo();
+    void getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1, UnitType utype);
     void refreshBuildingInfos();
     void refreshColors();
 
@@ -364,30 +365,52 @@ inline void Game::refreshInfo() {
     refreshColors();
 }
 
+inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
+                                  UnitType utype) {
+    uint32_t base = r.getAddr(addr + offset_0);
+
+    int currentCD = r.getInt(base + P_TIMEOFFSET);
+    bool status   = r.getBool(base + P_STATUSOFFSET);
+
+    uint32_t current = r.getAddr(base + P_CURRENTOFFSET);
+    uint32_t type    = r.getAddr(current + offset_1);
+    int offset       = r.getInt(type + P_ARRAYINDEXOFFSET);
+
+    auto it =
+        std::find_if(_units.items.begin(), _units.items.end(),
+                     [offset, utype](const Unit& u) { return u.checkOffset(offset * 4, utype); });
+
+    std::string name;
+
+    if (it != _units.items.end()) {
+        name = it->getName();
+
+        tagBuildingNode bn = tagBuildingNode(name);
+
+        bn.progress = currentCD;
+        bn.status   = status;
+
+        bi->list.push_back(bn);
+    }
+}
+
 inline void Game::refreshBuildingInfos() {
     for (int i = 0; i < MAXPLAYER; i++) {
         if (!_players[i]) {
             continue;
         }
 
-        uint32_t addr = _playerBases[i];
-        uint32_t base = r.getAddr(addr + P_INFANTRYOFFSET);
-
-        int currentCD      = r.getInt(base + P_TIMEOFFSET);
-        int status         = r.getInt(base + P_STATUSOFFSET);
-        uint32_t queueAddr = r.getAddr(base + P_QUEUEPTROFFSET);
-        int queueLen       = r.getInt(base + P_QUEUELENGTHOFFSET);
-
         tagBuildingInfo bi;
 
-        for (int j = 0; j < queueLen; j++) {
-            int nodeAddr = r.getAddr(queueAddr + j * 4);
+        uint32_t addr = _playerBases[i];
 
-            std::string name   = r.getString(nodeAddr + P_NAMEOFFSET);
-            tagBuildingNode bn = tagBuildingNode(name);
-
-            bi.list.push_back(bn);
-        }
+        getBuildingInfo(&bi, addr, P_AIRCRAFTOFFSET, P_UNITTYPEOFFSET, UnitType::Aircraft);
+        getBuildingInfo(&bi, addr, P_BUILDINGFIRSTOFFSET, P_BUILDINGTYPEOFFSET, UnitType::Building);
+        getBuildingInfo(&bi, addr, P_BUILDINGSECONDOFFSET, P_BUILDINGTYPEOFFSET,
+                        UnitType::Building);
+        getBuildingInfo(&bi, addr, P_INFANTRYOFFSET, P_INFANTRYTYPEOFFSET, UnitType::Infantry);
+        getBuildingInfo(&bi, addr, P_TANKOFFSET, P_UNITTYPEOFFSET, UnitType::Tank);
+        getBuildingInfo(&bi, addr, P_SHIPOFFSET, P_UNITTYPEOFFSET, UnitType::Tank);
 
         _buildingInfos[i] = bi;
     }

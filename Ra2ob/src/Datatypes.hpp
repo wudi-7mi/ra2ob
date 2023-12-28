@@ -40,13 +40,9 @@ struct tagBuildingNode {
     std::string name;
     int number   = 0;
     int progress = 0;
-    int status   = 0;  // 0 - in queue, 1 - stopped, 2 - building.
+    int status   = 0;  // 0 - building, 1 - stopped.
 
     explicit tagBuildingNode(std::string n) { name = n; }
-
-    void setStop() { status = 1; }
-
-    void setStart() { status = 2; }
 };
 
 struct tagBuildingInfo {
@@ -105,6 +101,7 @@ public:
     ~Unit();
 
     UnitType getUnitType();
+    bool checkOffset(int offsetCmp, UnitType type) const;
     int getUnitIndex();
     void fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& baseOffsets,
                    const std::array<uint32_t, MAXPLAYER>& valids);
@@ -235,6 +232,10 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
         r.readMemory(baseOffsets[i] + m_offset, &buf, m_size);
         m_value[i] = buf;
     }
+}
+
+bool Unit::checkOffset(int offsetCmp, UnitType type) const {
+    return (offsetCmp == m_offset && type == m_unitType);
 }
 
 inline UnitType Unit::getUnitType() { return m_unitType; }

@@ -44,6 +44,7 @@ constexpr int UNITSAFE = 4096;
 
 // Production Offsets
 
+constexpr int P_AIRCRAFTOFFSET       = 0x53AC;
 constexpr int P_BUILDINGFIRSTOFFSET  = 0x53BC;
 constexpr int P_BUILDINGSECONDOFFSET = 0x53CC;
 constexpr int P_INFANTRYOFFSET       = 0x53B0;
@@ -51,11 +52,16 @@ constexpr int P_TANKOFFSET           = 0x53B4;
 constexpr int P_SHIPOFFSET           = 0x53B8;
 
 constexpr int P_TIMEOFFSET        = 0x24;
+constexpr int P_STATUSOFFSET      = 0x70;
+constexpr int P_CURRENTOFFSET     = 0x58;
 constexpr int P_QUEUEPTROFFSET    = 0x44;
 constexpr int P_QUEUELENGTHOFFSET = 0x50;
-constexpr int P_STATUSOFFSET      = 0x70;
 
-constexpr int P_NAMEOFFSET = 0x64;
+constexpr int P_INFANTRYTYPEOFFSET = 0x6C0;
+constexpr int P_BUILDINGTYPEOFFSET = 0x520;
+constexpr int P_UNITTYPEOFFSET     = 0x6C4;
+
+constexpr int P_ARRAYINDEXOFFSET = 0xDF8;
 
 // Time Ints
 
