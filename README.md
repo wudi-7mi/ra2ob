@@ -9,7 +9,7 @@ Run `ra2ob.exe` as Administrator.
 ## Todos
 
 - [ ] Add Documents.
-- [ ] Add Producing List.
+- [x] Add Producing List.
 
 ## Develop
 

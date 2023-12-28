@@ -66,6 +66,10 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
                 continue;
             }
 
+            if (u.show == false) {
+                continue;
+            }
+
             ju["unitName"] = u.unitName;
             ju["num"]      = u.num;
 
@@ -76,7 +80,15 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
             jp["units"].push_back(ju);
         }
 
-        // Todo: Add buildings.
+        if (!p.building.list.empty()) {
+            json jb;
+
+            for (auto& b : p.building.list) {
+                jb["name"]     = b.name;
+                jb["progress"] = b.progress;
+                jb["status"]   = b.status;
+            }
+        }
 
         j["players"].push_back(jp);
     }
@@ -129,6 +141,10 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
                 continue;
             }
 
+            if (u.show == false) {
+                continue;
+            }
+
             std::cout << u.unitName << ": " << u.num;
 
             if (mode == 1) {
@@ -144,7 +160,10 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
             for (auto& b : p.building.list) {
                 std::cout << b.name << " " << b.progress << "/54 ";
-                if (b.status == 1) {
+                if (b.progress == 54) {
+                    std::cout << "Ready"
+                              << "\n";
+                } else if (b.status == 1) {
                     std::cout << "On Hold"
                               << "\n";
                 } else {

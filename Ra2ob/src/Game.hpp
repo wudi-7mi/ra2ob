@@ -265,6 +265,11 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
                 continue;
             }
 
+            bool s_show = true;
+            if (u.contains("Show") && u["Show"] == 0) {
+                s_show = false;
+            }
+
             std::string offset = u["Offset"];
             uint32_t s_offset  = std::stoul(offset, nullptr, 16);
 
@@ -273,7 +278,7 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
                 s_index = u["Index"];
             }
 
-            Unit ub(u["Name"], s_offset, s_ut, s_index);
+            Unit ub(u["Name"], s_offset, s_ut, s_index, s_show);
             _units.items.push_back(ub);
         }
     }
@@ -461,6 +466,7 @@ inline void Game::structBuild() {
             us.unitName = it.getName();
             us.index    = it.getUnitIndex();
             us.num      = it.getValueByIndex(i);
+            us.show     = it.checkShow();
             ui.units.push_back(us);
         }
 

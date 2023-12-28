@@ -10,13 +10,189 @@
       "Offset": "0xf4"
     },
     {
+      "Name": "Tesla Reactor",
+      "Offset": "0x24",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Barracks",
+      "Offset": "0x2c",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Ore Refinery",
+      "Offset": "0x3c",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Naval Shipyard",
+      "Offset": "0xf4"
+    },
+    {
+      "Name": "Radar Tower",
+      "Offset": "0x34",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Battle Lab",
+      "Offset": "0x28",
+      "Show": 0
+    },
+    {
+      "Name": "Nuclear Reactor",
+      "Offset": "0x104",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Cloning Vat",
+      "Offset": "0x120",
+      "Show": 0,
+      "Invalid": "yr"
+    },
+    {
+      "Name": "Service Depot",
+      "Offset": "0x68",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Construction Yard",
+      "Offset": "0x64",
+      "Show": 0
+    },
+    {
+      "Name": "Sentry Gun",
+      "Offset": "0x50",
+      "Show": 0
+    },
+    {
+      "Name": "Flak Cannon",
+      "Offset": "0x10c",
+      "Show": 0
+    },
+    {
+      "Name": "Tesla Reactor",
+      "Offset": "0xd4",
+      "Show": 0
+    },
+    {
+      "Name": "Soviet Psychic Sensor",
+      "Offset": "0x48",
+      "Show": 0,
+      "Invalid": "yr"
+    },
+    {
+      "Name": "Iron Curtain Device",
+      "Offset": "0x60",
+      "Show": 0
+    },
+    {
+      "Name": "Nuclear Missile Silo",
+      "Offset": "0xd8",
+      "Show": 0
+    },
+    {
+      "Name": "Battle Bunker",
+      "Offset": "0x59c",
+      "Show": 0
+    },
+    {
+      "Name": "Industrial Plant",
+      "Offset": "0x4d8",
+      "Show": 0
+    },
+    {
       "Name": "Allied War Factory",
       "Offset": "0x1c",
       "Index": 1
     },
     {
+      "Name": "Power Plant",
+      "Offset": "0x0",
+      "Show": 0
+    },
+    {
+      "Name": "Allied Barracks",
+      "Offset": "0xc",
+      "Show": 0
+    },
+    {
       "Name": "Allied Naval Shipyard",
       "Offset": "0x5c"
+    },
+    {
+      "Name": "Allied Ore Refinery",
+      "Offset": "0x4",
+      "Show": 0
+    },
+    {
+      "Name": "Airforce Command Headquarters (American)",
+      "Offset": "0x1a4",
+      "Show": 0
+    },
+    {
+      "Name": "Airforce Command Headquarters (American)",
+      "Offset": "0x21c",
+      "Show": 0
+    },
+    {
+      "Name": "Allied Battle Lab",
+      "Offset": "0x18",
+      "Show": 0
+    },
+    {
+      "Name": "Ore Purifier",
+      "Offset": "0x124",
+      "Show": 0
+    },
+    {
+      "Name": "Allied Service Depot",
+      "Offset": "0x14",
+      "Show": 0
+    },
+    {
+      "Name": "Allied Construction Yard",
+      "Offset": "0x8",
+      "Show": 0
+    },
+    {
+      "Name": "Pillbox",
+      "Offset": "0x108",
+      "Show": 0
+    },
+    {
+      "Name": "Patriot Missile System",
+      "Offset": "0x54",
+      "Show": 0
+    },
+    {
+      "Name": "Prism Tower",
+      "Offset": "0xdc",
+      "Show": 0
+    },
+    {
+      "Name": "Gap Generator",
+      "Offset": "0xfc",
+      "Show": 0
+    },
+    {
+      "Name": "Spy Satellite Uplink",
+      "Offset": "0xf8",
+      "Show": 0
+    },
+    {
+      "Name": "Chronosphere",
+      "Offset": "0x6c",
+      "Show": 0
+    },
+    {
+      "Name": "Weather Control Device",
+      "Offset": "0x74",
+      "Show": 0
+    },
+    {
+      "Name": "Robot Control Center",
+      "Offset": "0x590",
+      "Show": 0
     },
     {
       "Name": "Grand Cannon",
@@ -32,6 +208,65 @@
       "Name": "Slave Miner Deployed",
       "Offset": "0x594",
       "Index": 2
+    },
+    {
+      "Name": "Bio Reactor",
+      "Offset": "0x4b4",
+      "Show": 0
+    },
+    {
+      "Name": "Yuri Barracks",
+      "Offset": "0x4b8",
+      "Show": 0
+    },
+    {
+      "Name": "Submarine Pen",
+      "Offset": "0x4c0"
+    },
+    {
+      "Name": "Psychic Radar",
+      "Offset": "0x48",
+      "Show": 0
+    },
+    {
+      "Name": "Grinder",
+      "Offset": "0x4dc",
+      "Show": 0
+    },
+    {
+      "Name": "Battle Lab",
+      "Offset": "0x4c8",
+      "Show": 0
+    },
+    {
+      "Name": "Tank Bunker",
+      "Offset": "0x558",
+      "Show": 0
+    },
+    {
+      "Name": "Gattling Cannon",
+      "Offset": "0x4d0",
+      "Show": 0
+    },
+    {
+      "Name": "Psychic Tower",
+      "Offset": "0x4d4",
+      "Show": 0
+    },
+    {
+      "Name": "Cloning Vats",
+      "Offset": "0x120",
+      "Show": 0
+    },
+    {
+      "Name": "Genetic Mutator",
+      "Offset": "0x4e0",
+      "Show": 0
+    },
+    {
+      "Name": "Psychic Dominator",
+      "Offset": "0x4ec",
+      "Show": 0
     }
   ],
   "Tank": [
