@@ -148,11 +148,12 @@ constexpr char F_UNITOFFSETS[]  = "./config/unit_offsets.json";
 
 // Strings
 
-constexpr char STR_RULER[] = "====================================================================";
+constexpr char STR_RULER[] = "=====";
+constexpr int RULER_MULT   = 20;
 
 // Limitation
 
-constexpr bool GOODINTENTION = true;
+constexpr bool GOODINTENTION = false;
 
 }  // end of namespace Ra2ob
 

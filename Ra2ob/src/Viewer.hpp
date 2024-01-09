@@ -194,7 +194,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             }
         }
 
-        std::cout << STR_RULER << std::endl;
+        for (int i = 0; i < RULER_MULT; i++) {
+            std::cout << STR_RULER;
+        }
+
+        std::cout << std::endl;
     }
 }
 
