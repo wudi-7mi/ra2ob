@@ -147,7 +147,9 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
         std::cout << " Credit: " << p.panel.creditSpent;
 
-        std::cout << " Auto Repair: ";
+        if (p.status.infantrySelfHeal || p.status.unitSelfHeal) {
+            std::cout << " Auto Repair: ";
+        }
         if (p.status.infantrySelfHeal) {
             std::cout << "[Infantry+] ";
         }
