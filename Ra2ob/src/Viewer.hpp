@@ -200,15 +200,18 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             for (auto& b : p.building.list) {
                 std::cout << b.name << " " << b.progress << "/54 ";
                 if (b.progress == 54) {
-                    std::cout << "Ready"
-                              << "\n";
+                    std::cout << "Ready ";
                 } else if (b.status == 1) {
-                    std::cout << "On Hold"
-                              << "\n";
+                    std::cout << "On Hold ";
                 } else {
-                    std::cout << "Building"
-                              << "\n";
+                    std::cout << "Building ";
                 }
+
+                if (b.number > 1) {
+                    std::cout << "[" << b.number << "]";
+                }
+
+                std::cout << "\n";
             }
         }
 

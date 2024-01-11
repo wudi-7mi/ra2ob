@@ -414,6 +414,19 @@ inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, i
     uint32_t type    = r.getAddr(current + offset_1);
     int offset       = r.getInt(type + P_ARRAYINDEXOFFSET);
 
+    // Count same production item.
+    int queueLength    = r.getInt(base + P_QUEUELENGTHOFFSET);
+    uint32_t queueBase = r.getAddr(base + P_QUEUEPTROFFSET);
+    int count          = 1;
+    for (int i = 0; i < queueLength; i++) {
+        uint32_t curAddr = r.getAddr(queueBase + i * 4);
+        int curOffset    = r.getInt(curAddr + P_ARRAYINDEXOFFSET);
+        if (curOffset != offset) {
+            break;
+        }
+        count++;
+    }
+
     auto it =
         std::find_if(_units.items.begin(), _units.items.end(),
                      [offset, utype](const Unit& u) { return u.checkOffset(offset * 4, utype); });
@@ -427,6 +440,7 @@ inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, i
 
         bn.progress = currentCD;
         bn.status   = status;
+        bn.number   = count;
 
         bi->list.push_back(bn);
     }
