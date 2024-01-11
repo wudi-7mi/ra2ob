@@ -39,6 +39,7 @@ public:
     void refreshBuildingInfos();
     void refreshColors();
     void refreshStatusInfos();
+    void refreshGameFrame();
 
     void structBuild();
 
@@ -201,6 +202,7 @@ inline void Game::initAddrs() {
 
     bool isObserverFlag   = true;
     bool isAllControlable = true;
+    bool isThisGameOver   = false;
 
     for (int i = 0; i < MAXPLAYER; i++, playerBaseArrayPtr += 4) {
         uint32_t playerBase = r.getAddr(playerBaseArrayPtr);
@@ -216,6 +218,14 @@ inline void Game::initAddrs() {
                 isObserverFlag = false;
             } else {
                 isAllControlable = false;
+            }
+
+            bool isDefeated = r.getBool(realPlayerBase + 0x1f5);
+            bool isGameOver = r.getBool(realPlayerBase + 0x1f6);
+            bool isWinner   = r.getBool(realPlayerBase + 0x1f7);
+
+            if (isDefeated || isGameOver || isWinner) {
+                isThisGameOver = true;
             }
 
             _players[i]     = true;
@@ -235,11 +245,8 @@ inline void Game::initAddrs() {
         }
     }
 
-    if (isObserverFlag || isAllControlable) {
-        _gameInfo.isObserver = true;
-        return;
-    }
-    _gameInfo.isObserver = false;
+    _gameInfo.isObserver = isObserverFlag || isAllControlable;
+    _gameInfo.isGameOver = isThisGameOver;
 }
 
 inline void Game::loadNumericsFromJson(std::string filePath) {
@@ -332,6 +339,8 @@ inline void Game::initArrays() {
 inline void Game::initGameInfo() {
     _gameInfo.valid              = false;
     _gameInfo.isObserver         = false;
+    _gameInfo.isGameOver         = false;
+    _gameInfo.currentFrame       = 0;
     _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
     _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
     _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
@@ -391,6 +400,7 @@ inline void Game::refreshInfo() {
     refreshBuildingInfos();
     refreshColors();
     refreshStatusInfos();
+    refreshGameFrame();
 }
 
 inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
@@ -480,6 +490,8 @@ inline void Game::refreshStatusInfos() {
         _statusInfos[i] = si;
     }
 }
+
+inline void Game::refreshGameFrame() { _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET); }
 
 inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {

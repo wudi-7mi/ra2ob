@@ -73,8 +73,10 @@ struct tagDebugInfo {
 };
 
 struct tagGameInfo {
-    bool valid      = false;
-    bool isObserver = false;
+    bool valid       = false;
+    bool isObserver  = false;
+    bool isGameOver  = false;
+    int currentFrame = 0;
     std::array<tagPlayer, MAXPLAYER> players{};
     tagDebugInfo debug;
 };

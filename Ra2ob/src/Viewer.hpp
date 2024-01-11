@@ -127,6 +127,18 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         return;
     }
 
+    if (gi.currentFrame < 5) {
+        std::cout << "Game preparing.";
+        return;
+    }
+
+    if (gi.isGameOver) {
+        std::cout << "Game Over.";
+        return;
+    }
+
+    std::cout << "Game Frame: " << gi.currentFrame << "\n";
+
     for (auto& p : gi.players) {
         if (mode == 0 && !p.valid) {
             continue;
@@ -161,6 +173,10 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
         for (auto& u : p.units.units) {
             if (mode == 0 && u.num == 0) {
+                continue;
+            }
+
+            if (u.num < 0 || u.num > UNITSAFE) {
                 continue;
             }
 
