@@ -322,10 +322,6 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
                 continue;
             }
 
-            if (version == Version::Yr && u.contains("Invalid") && u["Invalid"] == "yr") {
-                continue;
-            }
-
             bool s_show = true;
             if (u.contains("Show") && u["Show"] == 0) {
                 s_show = false;
@@ -340,6 +336,12 @@ inline void Game::loadUnitsFromJson(std::string filePath) {
             }
 
             Unit ub(u["Name"], s_offset, s_ut, s_index, s_show);
+
+            std::string s_invalid;
+            if (u.contains("Invalid")) {
+                ub.setInvalid(u["Invalid"]);
+            }
+
             _units.items.push_back(ub);
         }
     }
@@ -464,9 +466,10 @@ inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, i
         count++;
     }
 
-    auto it =
-        std::find_if(_units.items.begin(), _units.items.end(),
-                     [offset, utype](const Unit& u) { return u.checkOffset(offset * 4, utype); });
+    Version v = version;
+    auto it   = std::find_if(
+        _units.items.begin(), _units.items.end(),
+        [offset, utype, v](const Unit& u) { return u.checkOffset(offset * 4, utype, v); });
 
     std::string name;
 
