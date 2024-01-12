@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "./Datatypes.hpp"
-#include "./json.hpp"
+#include "./third_party/json.hpp"
 
 using json = nlohmann::json;
 

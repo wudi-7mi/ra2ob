@@ -9,8 +9,9 @@
 #include <vector>
 
 #include "./Viewer.hpp"
-
+#include "./third_party/inicpp.hpp"
 // clang-format off
+#include <psapi.h> // NOLINT
 #include <TlHelp32.h>
 // clang-format on
 
@@ -178,6 +179,30 @@ inline void Game::getHandle() {
     HANDLE pHandle = OpenProcess(
         PROCESS_QUERY_INFORMATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_VM_READ,
         FALSE, pid);
+
+#ifdef UNICODE
+    wchar_t exePath[256];
+    GetModuleFileNameEx(pHandle, NULL, exePath, sizeof(exePath));
+    std::string filePath = utf16ToGbk(exePath);
+#else
+    char exePath[256];
+    GetModuleFileNameEx(pHandle, NULL, exePath, sizeof(exePath));
+    std::string filePath = exePath;
+#endif
+    // std::cout << exePath << std::endl;
+
+    std::string destPart = "gamemd-spawn.exe";
+    std::string iniPart  = "spawn.ini";
+
+    filePath = filePath.replace(filePath.find(destPart), destPart.length(), iniPart);
+
+    inicpp::IniManager iniData(filePath);
+
+    // if (!iniData["Settings"].isKeyExist("Ra2Mode")) {
+    //     std::cout << "Ra2Mode is not exist!" << std::endl;
+    // }
+    // std::string ra2Mode = iniData["Settings"]["Ra2Mode"];
+    // std::cout << "Ra2Mode = " << ra2Mode << std::endl;
 
     if (pHandle == nullptr) {
         std::cerr << "Could not open process\n";
