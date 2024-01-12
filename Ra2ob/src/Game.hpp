@@ -255,9 +255,9 @@ inline void Game::initAddrs() {
                 isAllControlable = false;
             }
 
-            bool isDefeated = r.getBool(realPlayerBase + 0x1f5);
-            bool isGameOver = r.getBool(realPlayerBase + 0x1f6);
-            bool isWinner   = r.getBool(realPlayerBase + 0x1f7);
+            bool isDefeated = r.getBool(realPlayerBase + ISDEFEATEDOFFSET);
+            bool isGameOver = r.getBool(realPlayerBase + ISGAMEOVEROFFSET);
+            bool isWinner   = r.getBool(realPlayerBase + ISWINNEROFFSET);
 
             if (isDefeated || isGameOver || isWinner) {
                 isThisGameOver = true;

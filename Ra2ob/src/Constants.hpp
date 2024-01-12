@@ -35,7 +35,7 @@ constexpr int UNITSELFHEALOFFSET     = 0x168;
 constexpr int CURRENTPLAYEROFFSET    = 0x1ec;
 constexpr int ISDEFEATEDOFFSET       = 0x1f5;
 constexpr int ISGAMEOVEROFFSET       = 0x1f6;
-constexpr int ISWINNER               = 0x1f7;
+constexpr int ISWINNEROFFSET         = 0x1f7;
 
 constexpr int BUILDINGOFFSET = 0x5554;
 constexpr int TANKOFFSET     = 0x5568;
