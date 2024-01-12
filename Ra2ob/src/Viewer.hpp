@@ -137,6 +137,12 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         return;
     }
 
+    std::cout << "Game Version: ";
+    if (gi.gameVersion == "Yr") {
+        std::cout << "Yr. | ";
+    } else {
+        std::cout << "Ra2. | ";
+    }
     std::cout << "Game Frame: " << gi.currentFrame << "\n";
 
     for (auto& p : gi.players) {

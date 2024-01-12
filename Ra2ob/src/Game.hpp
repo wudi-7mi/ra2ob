@@ -40,6 +40,7 @@ public:
     void refreshBuildingInfos();
     void refreshColors();
     void refreshStatusInfos();
+    void refreshGameVersion();
     void refreshGameFrame();
 
     void structBuild();
@@ -79,7 +80,7 @@ public:
 
     Reader r;
     Viewer viewer;
-    Version version = Version::Yr;  // Todo: Auto detect game version.
+    Version version = Version::Yr;
 
 private:
     Game();
@@ -189,7 +190,6 @@ inline void Game::getHandle() {
     GetModuleFileNameEx(pHandle, NULL, exePath, sizeof(exePath));
     std::string filePath = exePath;
 #endif
-    // std::cout << exePath << std::endl;
 
     std::string destPart = "gamemd-spawn.exe";
     std::string iniPart  = "spawn.ini";
@@ -198,11 +198,21 @@ inline void Game::getHandle() {
 
     inicpp::IniManager iniData(filePath);
 
-    // if (!iniData["Settings"].isKeyExist("Ra2Mode")) {
-    //     std::cout << "Ra2Mode is not exist!" << std::endl;
-    // }
-    // std::string ra2Mode = iniData["Settings"]["Ra2Mode"];
-    // std::cout << "Ra2Mode = " << ra2Mode << std::endl;
+    if (iniData["Settings"].isKeyExist("GameVersion")) {
+        std::string gameVersion = iniData["Settings"]["GameVersion"];
+        if (gameVersion == "0") {
+            version = Version::Yr;
+        } else {
+            version = Version::Ra2;
+        }
+    } else if (iniData["Settings"].isKeyExist("Ra2Mode")) {
+        std::string ra2Mode = iniData["Settings"]["Ra2Mode"];
+        if (ra2Mode == "False") {
+            version = Version::Yr;
+        } else {
+            version = Version::Ra2;
+        }
+    }
 
     if (pHandle == nullptr) {
         std::cerr << "Could not open process\n";
@@ -365,6 +375,7 @@ inline void Game::initGameInfo() {
     _gameInfo.valid              = false;
     _gameInfo.isObserver         = false;
     _gameInfo.isGameOver         = false;
+    _gameInfo.gameVersion        = "Yr";
     _gameInfo.currentFrame       = 0;
     _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
     _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
@@ -425,6 +436,7 @@ inline void Game::refreshInfo() {
     refreshBuildingInfos();
     refreshColors();
     refreshStatusInfos();
+    refreshGameVersion();
     refreshGameFrame();
 }
 
@@ -527,6 +539,14 @@ inline void Game::refreshStatusInfos() {
         si.unitSelfHeal     = unitSelfHeal;
 
         _statusInfos[i] = si;
+    }
+}
+
+inline void Game::refreshGameVersion() {
+    if (version == Version::Yr) {
+        _gameInfo.gameVersion = "Yr";
+    } else {
+        _gameInfo.gameVersion = "Ra2";
     }
 }
 
