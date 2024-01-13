@@ -17,17 +17,25 @@ constexpr int BOOLSIZE        = 0x1;
 constexpr int NUMSIZE         = 0x4;
 constexpr int PTRSIZE         = 0x4;
 constexpr int COLORSIZE       = 0x6;
-constexpr int STRNAMESIZE     = 0x20;  // 32 in hexadecimal
-constexpr int STRCOUNTRYSIZE  = 0x19;  // 25 in hexadecimal
-constexpr int STRUNITNAMESIZE = 0x20;  // 32 in hexadecimal
+constexpr int STRNAMESIZE     = 0x20;
+constexpr int STRCOUNTRYSIZE  = 0x19;
+constexpr int STRUNITNAMESIZE = 0x20;
 
 // Basic offsets
 
+constexpr int GAMEFRAMEOFFSET          = 0xa8ed84;
 constexpr int FIXEDOFFSET              = 0xa8b230;
 constexpr int CLASSBASEARRAYOFFSET     = 0xa8022c;
 constexpr int PLAYERBASEARRAYPTROFFSET = 0x1180;
-constexpr int HOUSETYPEOFFSET          = 0x34;
-constexpr int COLOROFFSET              = 0x56F9;
+
+constexpr int HOUSETYPEOFFSET        = 0x34;
+constexpr int COLOROFFSET            = 0x56F9;
+constexpr int INFANTRYSELFHEALOFFSET = 0x164;
+constexpr int UNITSELFHEALOFFSET     = 0x168;
+constexpr int CURRENTPLAYEROFFSET    = 0x1ec;
+constexpr int ISDEFEATEDOFFSET       = 0x1f5;
+constexpr int ISGAMEOVEROFFSET       = 0x1f6;
+constexpr int ISWINNEROFFSET         = 0x1f7;
 
 constexpr int BUILDINGOFFSET = 0x5554;
 constexpr int TANKOFFSET     = 0x5568;
@@ -71,15 +79,16 @@ constexpr int T_PRINTTIME  = 500;
 
 // Color Codes
 
-constexpr int C_YELLOW  = 0xE0D838;
-constexpr int C_YELLOW2 = 0xF0F840;
-constexpr int C_PURPLE  = 0x9848B8;
-constexpr int C_GREEN   = 0x58CC50;
-constexpr int C_RED     = 0xF84C48;
-constexpr int C_ORANGE  = 0xF8B048;
-constexpr int C_PINK    = 0xF8ACE8;
-constexpr int C_SKYBLUE = 0x58D4E0;
-constexpr int C_BLUE    = 0x487CC8;
+constexpr int C_YELLOW   = 0xE0D838;
+constexpr int C_YELLOW2  = 0xF0F840;
+constexpr int C_PURPLE   = 0x9848B8;
+constexpr int C_GREEN    = 0x58CC50;
+constexpr int C_RED      = 0xF84C48;
+constexpr int C_ORANGE   = 0xF8B048;
+constexpr int C_PINK     = 0xF8ACE8;
+constexpr int C_SKYBLUE  = 0x58D4E0;
+constexpr int C_SKYBLUE2 = 0x58D0E0;
+constexpr int C_BLUE     = 0x487CC8;
 
 // Console Color Codes
 
@@ -119,9 +128,11 @@ constexpr char STYLE_BG_YELLOW[]    = "\033[103m";
 constexpr char STYLE_BG_WHITE[]     = "\033[107m";
 
 const std::map<int, std::string> COLORMAP = {
-    {C_YELLOW, STYLE_BG_YELLOW}, {C_YELLOW2, STYLE_BG_YELLOW},    {C_PURPLE, STYLE_BG_PURPLE},
-    {C_GREEN, STYLE_BG_GREEN},   {C_RED, STYLE_BG_RED},           {C_ORANGE, STYLE_BG_ORANGE},
-    {C_PINK, STYLE_BG_PINK},     {C_SKYBLUE, STYLE_BG_LIGHTBLUE}, {C_BLUE, STYLE_BG_DARKBLUE},
+    {C_YELLOW, STYLE_BG_YELLOW},     {C_YELLOW2, STYLE_BG_YELLOW},
+    {C_PURPLE, STYLE_BG_PURPLE},     {C_GREEN, STYLE_BG_GREEN},
+    {C_RED, STYLE_BG_RED},           {C_ORANGE, STYLE_BG_ORANGE},
+    {C_PINK, STYLE_BG_PINK},         {C_SKYBLUE2, STYLE_BG_LIGHTBLUE},
+    {C_SKYBLUE, STYLE_BG_LIGHTBLUE}, {C_BLUE, STYLE_BG_DARKBLUE},
 };
 
 // Country Map
@@ -145,7 +156,12 @@ constexpr char F_UNITOFFSETS[]  = "./config/unit_offsets.json";
 
 // Strings
 
-constexpr char STR_RULER[] = "====================================================================";
+constexpr char STR_RULER[] = "=====";
+constexpr int RULER_MULT   = 20;
+
+// Limitation
+
+constexpr bool GOODINTENTION = false;
 
 }  // end of namespace Ra2ob
 
