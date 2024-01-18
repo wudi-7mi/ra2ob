@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "./Viewer.hpp"
-#include "./third_party/inicpp.hpp"
 // clang-format off
 #include <psapi.h> // NOLINT
 #include <TlHelp32.h>
@@ -42,6 +41,7 @@ public:
     void refreshStatusInfos();
     void refreshGameVersion();
     void refreshGameFrame();
+    void refreshMapName();
 
     void structBuild();
 
@@ -80,8 +80,9 @@ public:
 
     Reader r;
     Viewer viewer;
-    Version version = Version::Yr;
-    bool isReplay   = false;
+    Version version     = Version::Yr;
+    bool isReplay       = false;
+    std::string mapName = "";
 
 private:
     Game();
@@ -194,20 +195,26 @@ inline void Game::getHandle() {
 
     std::string destPart = "gamemd-spawn.exe";
     std::string iniPart  = "spawn.ini";
+    std::string setPart  = "Settings";
 
     filePath = filePath.replace(filePath.find(destPart), destPart.length(), iniPart);
 
-    inicpp::IniManager iniData(filePath);
+    IniFile inifile(filePath, setPart);
+    std::string gameVerson = "GameVersion";
+    std::string ra2Mode    = "Ra2Mode";
+    std::string recordFile = "RecordFile";
+    std::string lbMapName  = "LBMapName";
+    std::string uiMapName  = "UIMapName";
 
-    if (iniData["Settings"].isKeyExist("GameVersion")) {
-        std::string gameVersion = iniData["Settings"]["GameVersion"];
+    if (inifile.isItemExist(gameVerson)) {
+        std::string gameVersion = inifile.getItem(gameVerson);
         if (gameVersion == "0") {
             version = Version::Yr;
         } else {
             version = Version::Ra2;
         }
-    } else if (iniData["Settings"].isKeyExist("Ra2Mode")) {
-        std::string ra2Mode = iniData["Settings"]["Ra2Mode"];
+    } else if (inifile.isItemExist(ra2Mode)) {
+        std::string ra2Mode = inifile.getItem(ra2Mode);
         if (ra2Mode == "False") {
             version = Version::Yr;
         } else {
@@ -215,10 +222,16 @@ inline void Game::getHandle() {
         }
     }
 
-    if (iniData["Settings"].isKeyExist("RecordFile")) {
+    if (inifile.isItemExist(recordFile)) {
         isReplay = true;
     } else {
         isReplay = false;
+    }
+
+    if (inifile.isItemExist(lbMapName)) {
+        mapName = inifile.getItem(lbMapName);
+    } else if (inifile.isItemExist(uiMapName)) {
+        mapName = inifile.getItem(uiMapName);
     }
 
     if (pHandle == nullptr) {
@@ -383,6 +396,7 @@ inline void Game::initGameInfo() {
     _gameInfo.isGameOver         = false;
     _gameInfo.gameVersion        = "Yr";
     _gameInfo.currentFrame       = 0;
+    _gameInfo.mapName            = "";
     _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
     _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
     _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
@@ -444,6 +458,7 @@ inline void Game::refreshInfo() {
     refreshStatusInfos();
     refreshGameVersion();
     refreshGameFrame();
+    refreshMapName();
 }
 
 inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
@@ -558,6 +573,8 @@ inline void Game::refreshGameVersion() {
 }
 
 inline void Game::refreshGameFrame() { _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET); }
+
+inline void Game::refreshMapName() { _gameInfo.mapName = mapName; }
 
 inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {

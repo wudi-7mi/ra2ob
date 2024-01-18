@@ -143,6 +143,9 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     } else {
         std::cout << "Ra2. | ";
     }
+
+    std::cout << "Map Name: " << gi.mapName << " | ";
+
     std::cout << "Game Frame: " << gi.currentFrame << "\n";
 
     for (auto& p : gi.players) {

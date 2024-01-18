@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 
+#include "./third_party/inicpp.hpp"
 #include "./third_party/json.hpp"
 
 using json = nlohmann::json;
@@ -27,6 +28,29 @@ inline json readJsonFromFile(std::string filePath) {
 
     return j;
 }
+
+class IniFile {
+public:
+    IniFile(std::string filePath, std::string seg);
+
+    bool isItemExist(std::string item);
+    std::string getItem(std::string item);
+
+private:
+    inicpp::IniManager* im;
+    std::string m_filePath;
+    std::string m_seg;
+};
+
+inline IniFile::IniFile(std::string filePath, std::string seg) {
+    m_filePath = filePath;
+    m_seg      = seg;
+    im         = new inicpp::IniManager(m_filePath);
+}
+
+inline bool IniFile::isItemExist(std::string item) { return ((*im)[m_seg].isKeyExist(item)); }
+
+inline std::string IniFile::getItem(std::string item) { return ((*im)[m_seg][item]); }
 
 inline std::string utf16ToGbk(const wchar_t* src_wstr) {
     int len = WideCharToMultiByte(CP_ACP, 0, src_wstr, -1, nullptr, 0, nullptr, nullptr);
