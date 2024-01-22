@@ -80,9 +80,10 @@ public:
 
     Reader r;
     Viewer viewer;
-    Version version     = Version::Yr;
-    bool isReplay       = false;
-    std::string mapName = "";
+    Version version        = Version::Yr;
+    bool isReplay          = false;
+    std::string mapName    = "";
+    std::string mapNameUtf = "";
 
 private:
     Game();
@@ -233,6 +234,8 @@ inline void Game::getHandle() {
     } else if (inifile.isItemExist(uiMapName)) {
         mapName = inifile.getItem(uiMapName);
     }
+
+    mapNameUtf = utf16ToUtf8(gbkToUtf16(mapName.c_str()).c_str());
 
     if (pHandle == nullptr) {
         std::cerr << "Could not open process\n";
@@ -397,6 +400,7 @@ inline void Game::initGameInfo() {
     _gameInfo.gameVersion        = "Yr";
     _gameInfo.currentFrame       = 0;
     _gameInfo.mapName            = "";
+    _gameInfo.mapNameUtf         = "";
     _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
     _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
     _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
@@ -574,7 +578,10 @@ inline void Game::refreshGameVersion() {
 
 inline void Game::refreshGameFrame() { _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET); }
 
-inline void Game::refreshMapName() { _gameInfo.mapName = mapName; }
+inline void Game::refreshMapName() {
+    _gameInfo.mapName    = mapName;
+    _gameInfo.mapNameUtf = mapNameUtf;
+}
 
 inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {

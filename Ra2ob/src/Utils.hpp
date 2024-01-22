@@ -72,6 +72,16 @@ inline std::string utf16ToUtf8(const wchar_t* src_wstr) {
     return std::string(str.begin(), str.end() - 1);
 }
 
+inline std::wstring gbkToUtf16(const char* src_str) {
+    int len = MultiByteToWideChar(CP_ACP, 0, src_str, -1, nullptr, 0);
+
+    std::vector<wchar_t> wstr(len);
+
+    MultiByteToWideChar(CP_ACP, 0, src_str, -1, &wstr[0], len);
+
+    return std::wstring(wstr.begin(), wstr.end() - 1);
+}
+
 inline std::string convertFrameToTimeString(int frame, int framePerSecond) {
     int totalSeconds = frame / framePerSecond;
 
