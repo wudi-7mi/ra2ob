@@ -171,7 +171,7 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
     std::cout << "Map Name: " << gi.mapName << " | ";
 
-    std::cout << "Game Frame: " << gi.currentFrame << "\n";
+    std::cout << "Game Time: " << convertFrameToTimeString(gi.currentFrame, GAMESPEED) << "\n";
 
     for (auto& p : gi.players) {
         if (mode == 0 && !p.valid) {

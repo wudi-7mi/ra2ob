@@ -72,6 +72,18 @@ inline std::string utf16ToUtf8(const wchar_t* src_wstr) {
     return std::string(str.begin(), str.end() - 1);
 }
 
+inline std::string convertFrameToTimeString(int frame, int framePerSecond) {
+    int totalSeconds = frame / framePerSecond;
+
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(2) << minutes << ":" << std::setw(2) << seconds;
+
+    return ss.str();
+}
+
 }  // end of namespace Ra2ob
 
 #endif  // RA2OB_SRC_UTILS_HPP_
