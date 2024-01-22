@@ -214,8 +214,8 @@ inline void Game::getHandle() {
             version = Version::Ra2;
         }
     } else if (inifile.isItemExist(ra2Mode)) {
-        std::string ra2Mode = inifile.getItem(ra2Mode);
-        if (ra2Mode == "False") {
+        std::string mode = inifile.getItem(ra2Mode);
+        if (mode == "False") {
             version = Version::Yr;
         } else {
             version = Version::Ra2;
