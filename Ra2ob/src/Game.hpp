@@ -268,10 +268,9 @@ inline void Game::initAddrs() {
 
         if (playerBase != INVALIDCLASS) {
             uint32_t realPlayerBase = r.getAddr(playerBase * 4 + classBaseArray);
+            int cur_c               = r.getInt(realPlayerBase + CURRENTPLAYEROFFSET);
 
-            bool cur          = r.getBool(realPlayerBase + CURRENTPLAYEROFFSET);
-            std::string cur_s = r.getString(realPlayerBase + STRNAMEOFFSET);
-            if (cur) {
+            if (cur_c == 0x1010000 || cur_c == 0x101) {
                 isObserverFlag = false;
             }
 
