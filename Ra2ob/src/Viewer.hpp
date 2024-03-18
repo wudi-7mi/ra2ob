@@ -136,6 +136,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     if (mode == 2) {
         json j;
 
+        std::array<std::string, MAXPLAYER> playerName;
+        for (int i = 0; i < MAXPLAYER; i++) {
+            playerName[i] = gi.players[i].panel.playerName;
+        }
+
         j["debug"]["playerBase"]   = vecToHex(gi.debug.playerBase);
         j["debug"]["buildingBase"] = vecToHex(gi.debug.buildingBase);
         j["debug"]["infantryBase"] = vecToHex(gi.debug.infantryBase);
@@ -143,7 +148,30 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
         j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
 
-        std::cout << j.dump() << std::endl;
+        std::cout << "[pid]          " << gi.debug.setting.pid << std::endl;
+        std::cout << "[gamePath]     " << gi.debug.setting.gamePath << std::endl;
+        std::cout << "[isReplay]     " << gi.debug.setting.isReplay << std::endl;
+        std::cout << "[mapName]      " << gi.debug.setting.mapName << std::endl;
+        std::cout << "[screenSize]   " << gi.debug.setting.screenWidth << "*"
+                  << gi.debug.setting.screenHeight << std::endl;
+        std::cout << "[fullScreen]   " << gi.debug.setting.fullScreen << std::endl;
+        std::cout << "[windowed]     " << gi.debug.setting.windowed << std::endl;
+        std::cout << "[border]       " << gi.debug.setting.border << std::endl;
+        std::cout << "[render]       " << gi.debug.setting.renderer << std::endl;
+        std::cout << "[displayMode]  " << gi.debug.setting.display << std::endl;
+
+        std::cout << "[playerName]   ";
+        for (int i = 0; i < MAXPLAYER; i++) {
+            std::cout << gi.players[i].panel.playerName << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "[playerBase]   " << j["debug"]["playerBase"].dump() << std::endl;
+        std::cout << "[buildingBase] " << j["debug"]["buildingBase"].dump() << std::endl;
+        std::cout << "[infantryBase] " << j["debug"]["infantryBase"].dump() << std::endl;
+        std::cout << "[tankBase]     " << j["debug"]["aircraftBase"].dump() << std::endl;
+        std::cout << "[aircraftBase] " << j["debug"]["aircraftBase"].dump() << std::endl;
+        std::cout << "[houseType]    " << j["debug"]["houseType"].dump() << std::endl;
+
         return;
     }
 

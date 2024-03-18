@@ -35,6 +35,8 @@ public:
 
     bool isItemExist(std::string item);
     std::string getItem(std::string item);
+    bool getItemBool(std::string item);
+    int getItemInt(std::string item);
 
 private:
     inicpp::IniManager* im;
@@ -51,6 +53,29 @@ inline IniFile::IniFile(std::string filePath, std::string seg) {
 inline bool IniFile::isItemExist(std::string item) { return ((*im)[m_seg].isKeyExist(item)); }
 
 inline std::string IniFile::getItem(std::string item) { return ((*im)[m_seg][item]); }
+
+inline bool IniFile::getItemBool(std::string item) {
+    std::string res = (*im)[m_seg][item];
+
+    if (res == "False" || res == "0" || res == "") {
+        return false;
+    }
+    return true;
+}
+
+inline int IniFile::getItemInt(std::string item) {
+    std::string res = (*im)[m_seg][item];
+
+    try {
+        int ret = std::stoi(res);
+        return ret;
+    } catch (const std::invalid_argument& e) {
+        std::cerr << "stoi: Invalid Argument." << std::endl;
+    } catch (const std::out_of_range& e) {
+        std::cerr << "stoi: Out of Range." << std::endl;
+    }
+    return 0;
+}
 
 inline std::string utf16ToGbk(const wchar_t* src_wstr) {
     int len = WideCharToMultiByte(CP_ACP, 0, src_wstr, -1, nullptr, 0, nullptr, nullptr);

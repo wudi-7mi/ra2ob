@@ -149,6 +149,13 @@ const std::map<std::string, std::string> COUNTRYMAP = {
 
 enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
 enum class Version : int { Yr = 1, Ra2 = 0 };
+enum class DisplayMode : int {
+    Fullscreen          = 4,
+    Windowed            = 3,
+    BorderlessWindowed  = 2,
+    StretchedFullscreen = 1,
+    Unknown             = 0,
+};
 
 // Files
 

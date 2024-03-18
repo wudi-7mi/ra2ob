@@ -63,6 +63,22 @@ struct tagPlayer {
     tagBuildingInfo building;
 };
 
+struct tagSetting {
+    int pid              = 0;
+    std::string gamePath = "";
+    std::string platform = "";
+    Version version      = Version::Ra2;
+    bool isReplay        = false;
+    std::string mapName  = "";
+    int screenWidth      = 0;
+    int screenHeight     = 0;
+    bool fullScreen      = false;
+    bool windowed        = false;
+    bool border          = false;
+    std::string display  = "";
+    std::string renderer = "";
+};
+
 struct tagDebugInfo {
     std::array<uint32_t, MAXPLAYER> playerBase{};
     std::array<uint32_t, MAXPLAYER> buildingBase{};
@@ -70,6 +86,7 @@ struct tagDebugInfo {
     std::array<uint32_t, MAXPLAYER> tankBase{};
     std::array<uint32_t, MAXPLAYER> aircraftBase{};
     std::array<uint32_t, MAXPLAYER> houseType{};
+    tagSetting setting;
 };
 
 struct tagGameInfo {

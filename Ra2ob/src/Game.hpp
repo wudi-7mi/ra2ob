@@ -24,6 +24,7 @@ public:
     void operator=(const Game&) = delete;
 
     void getHandle();
+    DisplayMode getDisplayMode(bool fullscreen, bool windowed, bool border);
     void initAddrs();
 
     void loadNumericsFromJson(std::string filePath = F_PANELOFFSETS);
@@ -184,6 +185,14 @@ inline void Game::getHandle() {
         PROCESS_QUERY_INFORMATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_VM_READ,
         FALSE, pid);
 
+    if (pHandle == nullptr) {
+        std::cerr << "Could not open process\n";
+        r = Reader(nullptr);
+        return;
+    }
+
+    r = Reader(pHandle);
+
 #ifdef UNICODE
     wchar_t exePath[256];
     GetModuleFileNameEx(pHandle, NULL, exePath, sizeof(exePath));
@@ -194,56 +203,153 @@ inline void Game::getHandle() {
     std::string filePath = exePath;
 #endif
 
+    std::string gamePath = filePath;
     std::string destPart = "gamemd-spawn.exe";
-    std::string iniPart  = "spawn.ini";
-    std::string setPart  = "Settings";
 
-    filePath = filePath.replace(filePath.find(destPart), destPart.length(), iniPart);
+    // Get info from spawnini
+    std::string spawnini = "spawn.ini";
+    std::string spawniniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), spawnini);
+    destPart = spawnini;
 
-    IniFile inifile(filePath, setPart);
-    std::string gameVerson = "GameVersion";
-    std::string ra2Mode    = "Ra2Mode";
-    std::string recordFile = "RecordFile";
-    std::string lbMapName  = "LBMapName";
-    std::string uiMapName  = "UIMapName";
+    std::string spawniniSettings = "Settings";
+    IniFile sif(spawniniPath, spawniniSettings);
+    std::string gameVersion = "GameVersion";
+    std::string ra2Mode     = "Ra2Mode";
+    std::string recordFile  = "RecordFile";
+    std::string lbMapName   = "LBMapName";
+    std::string uiMapName   = "UIMapName";
 
-    if (inifile.isItemExist(gameVerson)) {
-        std::string gameVersion = inifile.getItem(gameVerson);
-        if (gameVersion == "0") {
-            version = Version::Yr;
-        } else {
+    if (sif.isItemExist(gameVersion)) {
+        if (sif.getItemBool(gameVersion)) {
             version = Version::Ra2;
+        } else {
+            version = Version::Yr;
         }
-    } else if (inifile.isItemExist(ra2Mode)) {
-        std::string mode = inifile.getItem(ra2Mode);
-        if (mode == "False") {
-            version = Version::Yr;
-        } else {
+    } else if (sif.isItemExist(ra2Mode)) {
+        if (sif.getItemBool(ra2Mode)) {
             version = Version::Ra2;
+        } else {
+            version = Version::Yr;
         }
     }
 
-    if (inifile.isItemExist(recordFile)) {
+    if (sif.isItemExist(recordFile)) {
         isReplay = true;
     } else {
         isReplay = false;
     }
 
-    if (inifile.isItemExist(lbMapName)) {
-        mapName = inifile.getItem(lbMapName);
-    } else if (inifile.isItemExist(uiMapName)) {
-        mapName = inifile.getItem(uiMapName);
+    if (sif.isItemExist(lbMapName)) {
+        mapName = sif.getItem(lbMapName);
+    } else if (sif.isItemExist(uiMapName)) {
+        mapName = sif.getItem(uiMapName);
     }
 
     mapNameUtf = utf16ToUtf8(gbkToUtf16(mapName.c_str()).c_str());
 
-    if (pHandle == nullptr) {
-        std::cerr << "Could not open process\n";
-        r = Reader(nullptr);
-        return;
+    // Get info from RA2MD.ini
+    std::string ra2mdini = "RA2MD.ini";
+    std::string ra2mdiniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), ra2mdini);
+    destPart = ra2mdini;
+
+    std::string ra2mdiniSettings = "Video";
+    IniFile rif(ra2mdiniPath, ra2mdiniSettings);
+    std::string screenWidth  = "ScreenWidth";
+    std::string screenHeight = "ScreenHeight";
+    int sw                   = 0;
+    int sh                   = 0;
+
+    if (rif.isItemExist(screenWidth)) {
+        sw = rif.getItemInt(screenWidth);
     }
 
-    r = Reader(pHandle);
+    if (rif.isItemExist(screenHeight)) {
+        sh = rif.getItemInt(screenHeight);
+    }
+
+    // Get info from ddraw.ini
+    std::string ddrawini = "ddraw.ini";
+    std::string ddrawiniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), ddrawini);
+    destPart = ddrawini;
+
+    std::string ddrawiniSettings = "ddraw";
+    IniFile dif(ddrawiniPath, ddrawiniSettings);
+    std::string fullScreen = "fullscreen";
+    std::string windowed   = "windowed";
+    std::string border     = "border";
+    std::string renderer   = "renderer";
+
+    bool fs_bool  = false;
+    bool win_bool = false;
+    bool bor_bool = false;
+    std::string renderer_string;
+
+    if (dif.isItemExist(fullScreen)) {
+        fs_bool = dif.getItemBool(fullScreen);
+    }
+
+    if (dif.isItemExist(windowed)) {
+        win_bool = dif.getItemBool(windowed);
+    }
+
+    if (dif.isItemExist(border)) {
+        bor_bool = dif.getItemBool(border);
+    }
+
+    if (dif.isItemExist(renderer)) {
+        renderer_string = dif.getItem(renderer);
+    }
+
+    DisplayMode dm = getDisplayMode(fs_bool, win_bool, bor_bool);
+
+    _gameInfo.debug.setting.pid          = pid;
+    _gameInfo.debug.setting.gamePath     = gamePath;
+    _gameInfo.debug.setting.platform     = "";
+    _gameInfo.debug.setting.version      = version;
+    _gameInfo.debug.setting.isReplay     = isReplay;
+    _gameInfo.debug.setting.mapName      = mapName;
+    _gameInfo.debug.setting.screenWidth  = sw;
+    _gameInfo.debug.setting.screenHeight = sh;
+    _gameInfo.debug.setting.fullScreen   = fs_bool;
+    _gameInfo.debug.setting.windowed     = win_bool;
+    _gameInfo.debug.setting.border       = bor_bool;
+    _gameInfo.debug.setting.renderer     = renderer_string;
+
+    switch (dm) {
+        case DisplayMode::Fullscreen:
+            _gameInfo.debug.setting.display = "Fullscreen Exclusive";
+            break;
+        case DisplayMode::Windowed:
+            _gameInfo.debug.setting.display = "Windowed";
+            break;
+        case DisplayMode::BorderlessWindowed:
+            _gameInfo.debug.setting.display = "Borderless Windowed";
+            break;
+        case DisplayMode::StretchedFullscreen:
+            _gameInfo.debug.setting.display = "Stretched Fullscreen";
+            break;
+        default:
+            _gameInfo.debug.setting.display = "Unknown Displaymode";
+    }
+}
+
+inline DisplayMode Game::getDisplayMode(bool fullscreen, bool windowed, bool border) {
+    if (!windowed) {
+        return DisplayMode::Fullscreen;
+    } else if (!fullscreen) {
+        if (border) {
+            return DisplayMode::Windowed;
+        } else {
+            return DisplayMode::BorderlessWindowed;
+        }
+    } else if (fullscreen) {
+        return DisplayMode::StretchedFullscreen;
+    } else {
+        return DisplayMode::Unknown;
+    }
 }
 
 /**
@@ -392,22 +498,7 @@ inline void Game::initArrays() {
     _colors.fill("0x000000");
 }
 
-inline void Game::initGameInfo() {
-    _gameInfo.valid              = false;
-    _gameInfo.isObserver         = false;
-    _gameInfo.isGameOver         = false;
-    _gameInfo.gameVersion        = "Yr";
-    _gameInfo.currentFrame       = 0;
-    _gameInfo.mapName            = "";
-    _gameInfo.mapNameUtf         = "";
-    _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
-    _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.infantryBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.tankBase     = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.aircraftBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.houseType    = std::array<uint32_t, MAXPLAYER>{};
-}
+inline void Game::initGameInfo() { _gameInfo = tagGameInfo{}; }
 
 /**
  * Return valid player number.
