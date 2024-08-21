@@ -210,7 +210,7 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
                 continue;
             }
 
-            if (u.num < 0 || u.num > UNITSAFE) {
+            if (u.num < 0) {
                 continue;
             }
 

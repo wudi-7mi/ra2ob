@@ -249,6 +249,12 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
         uint32_t buf = 0;
 
         r.readMemory(baseOffsets[i] + m_offset, &buf, m_size);
+
+        // Check if the number is valid
+        // [Todo]: Find real cause of abnormal planes' number
+        if (buf > UNITSAFE) {
+            buf = 0;
+        }
         m_value[i] = buf;
     }
 }
