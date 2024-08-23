@@ -164,14 +164,19 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
     std::cout << "Game Version: ";
     if (gi.gameVersion == "Yr") {
-        std::cout << "Yr. | ";
+        std::cout << "Yr | ";
     } else {
-        std::cout << "Ra2. | ";
+        std::cout << "Ra2 | ";
     }
 
     std::cout << "Map Name: " << gi.mapName << " | ";
 
-    std::cout << "Game Time: " << convertFrameToTimeString(gi.currentFrame, GAMESPEED) << "\n";
+    std::cout << "Game Time: " << convertFrameToTimeString(gi.currentFrame, GAMESPEED) << " | ";
+
+    if (gi.isGamePaused) {
+        std::cout << "[Paused]";
+    }
+    std::cout << "\n";
 
     for (auto& p : gi.players) {
         if (mode == 0 && !p.valid) {

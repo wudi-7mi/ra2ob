@@ -76,6 +76,7 @@ struct tagGameInfo {
     bool valid              = false;
     bool isObserver         = false;
     bool isGameOver         = false;
+    bool isGamePaused       = false;
     std::string gameVersion = "Yr";
     int currentFrame        = 0;
     std::string mapName     = "";

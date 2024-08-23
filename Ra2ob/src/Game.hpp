@@ -39,9 +39,7 @@ public:
     void refreshBuildingInfos();
     void refreshColors();
     void refreshStatusInfos();
-    void refreshGameVersion();
-    void refreshGameFrame();
-    void refreshMapName();
+    void refreshGameInfos();
 
     void structBuild();
 
@@ -396,6 +394,7 @@ inline void Game::initGameInfo() {
     _gameInfo.valid              = false;
     _gameInfo.isObserver         = false;
     _gameInfo.isGameOver         = false;
+    _gameInfo.isGamePaused       = false;
     _gameInfo.gameVersion        = "Yr";
     _gameInfo.currentFrame       = 0;
     _gameInfo.mapName            = "";
@@ -459,9 +458,8 @@ inline void Game::refreshInfo() {
     refreshBuildingInfos();
     refreshColors();
     refreshStatusInfos();
-    refreshGameVersion();
-    refreshGameFrame();
-    refreshMapName();
+
+    refreshGameInfos();
 }
 
 inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
@@ -567,19 +565,19 @@ inline void Game::refreshStatusInfos() {
     }
 }
 
-inline void Game::refreshGameVersion() {
+inline void Game::refreshGameInfos() {
     if (version == Version::Yr) {
         _gameInfo.gameVersion = "Yr";
     } else {
         _gameInfo.gameVersion = "Ra2";
     }
-}
 
-inline void Game::refreshGameFrame() { _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET); }
+    _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET);
 
-inline void Game::refreshMapName() {
     _gameInfo.mapName    = mapName;
     _gameInfo.mapNameUtf = mapNameUtf;
+
+    _gameInfo.isGamePaused = r.getBool(GAMEPAUSEOFFSET);
 }
 
 inline void Game::structBuild() {

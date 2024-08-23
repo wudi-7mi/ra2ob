@@ -24,6 +24,7 @@ constexpr int STRUNITNAMESIZE = 0x20;
 
 // Basic offsets
 
+constexpr int GAMEPAUSEOFFSET          = 0xa8ed8c;
 constexpr int GAMEFRAMEOFFSET          = 0xa8ed84;
 constexpr int FIXEDOFFSET              = 0xa8b230;
 constexpr int CLASSBASEARRAYOFFSET     = 0xa8022c;
