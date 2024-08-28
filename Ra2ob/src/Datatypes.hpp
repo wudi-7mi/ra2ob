@@ -93,6 +93,7 @@ struct tagGameInfo {
     bool valid              = false;
     bool isObserver         = false;
     bool isGameOver         = false;
+    bool isGamePaused       = false;
     std::string gameVersion = "Yr";
     int currentFrame        = 0;
     std::string mapName     = "";
@@ -266,6 +267,12 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
         uint32_t buf = 0;
 
         r.readMemory(baseOffsets[i] + m_offset, &buf, m_size);
+
+        // Check if the number is valid
+        // [Todo]: Find real cause of abnormal planes' number
+        if (buf > UNITSAFE) {
+            buf = 0;
+        }
         m_value[i] = buf;
     }
 }
