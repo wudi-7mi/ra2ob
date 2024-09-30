@@ -26,6 +26,7 @@ constexpr int STRUNITNAMESIZE = 0x20;
 
 constexpr int GAMEPAUSEOFFSET          = 0xa8ed8c;
 constexpr int GAMEFRAMEOFFSET          = 0xa8ed84;
+constexpr int GAMETIMEOFFSET           = 0xabcd4c;
 constexpr int FIXEDOFFSET              = 0xa8b230;
 constexpr int CLASSBASEARRAYOFFSET     = 0xa8022c;
 constexpr int PLAYERBASEARRAYPTROFFSET = 0x1180;
@@ -34,6 +35,7 @@ constexpr int HOUSETYPEOFFSET        = 0x34;
 constexpr int COLOROFFSET            = 0x56F9;
 constexpr int INFANTRYSELFHEALOFFSET = 0x164;
 constexpr int UNITSELFHEALOFFSET     = 0x168;
+constexpr int TEAMNUMBEROFFSET       = 0x1d8;
 constexpr int CURRENTPLAYEROFFSET    = 0x1ec;
 constexpr int ISDEFEATEDOFFSET       = 0x1f5;
 constexpr int ISGAMEOVEROFFSET       = 0x1f6;

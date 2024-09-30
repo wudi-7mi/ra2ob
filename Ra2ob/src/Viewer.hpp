@@ -148,6 +148,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
         j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
 
+        j["debug"]["playerTeamNumber"]   = gi.debug.playerTeamNumber;
+        j["debug"]["playerDefeatFlag"]   = gi.debug.playerDefeatFlag;
+        j["debug"]["playerGameoverFlag"] = gi.debug.playerGameoverFlag;
+        j["debug"]["playerWinnerFlag"]   = gi.debug.playerWinnerFlag;
+
         std::cout << "[pid]          " << gi.debug.setting.pid << std::endl;
         std::cout << "[gamePath]     " << gi.debug.setting.gamePath << std::endl;
         std::cout << "[isReplay]     " << gi.debug.setting.isReplay << std::endl;
@@ -171,6 +176,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         std::cout << "[tankBase]     " << j["debug"]["aircraftBase"].dump() << std::endl;
         std::cout << "[aircraftBase] " << j["debug"]["aircraftBase"].dump() << std::endl;
         std::cout << "[houseType]    " << j["debug"]["houseType"].dump() << std::endl;
+
+        std::cout << "[playerTeamNumber]" << j["debug"]["playerTeamNumber"].dump() << std::endl;
+        std::cout << "[playerDefeatFlag]" << j["debug"]["playerDefeatFlag"].dump() << std::endl;
+        std::cout << "[playerGameoverFlag]" << j["debug"]["playerGameoverFlag"].dump() << std::endl;
+        std::cout << "[playerWinnerFlag]" << j["debug"]["playerWinnerFlag"].dump() << std::endl;
 
         return;
     }
@@ -206,6 +216,8 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     }
     std::cout << "\n";
 
+    std::vector<int> teamList;  // 0: no team
+
     for (auto& p : gi.players) {
         if (mode == 0 && !p.valid) {
             continue;
@@ -225,6 +237,16 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         std::cout << " Balance: " << p.panel.balance;
         std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
         std::cout << " Credit: " << p.panel.creditSpent;
+
+        int teamIndex;
+        auto it = std::find(teamList.begin(), teamList.end(), p.status.teamNumber);
+        if (it != teamList.end()) {
+            teamIndex = std::distance(teamList.begin(), it);
+        } else {
+            teamList.push_back(p.status.teamNumber);
+            teamIndex = teamList.size() - 1;
+        }
+        std::cout << " Team: " << teamIndex << " ";
 
         if (p.status.infantrySelfHeal || p.status.unitSelfHeal) {
             std::cout << " Auto Repair: ";

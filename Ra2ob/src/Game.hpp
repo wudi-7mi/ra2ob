@@ -77,6 +77,11 @@ public:
 
     std::array<uint32_t, MAXPLAYER> _houseTypes;
 
+    std::array<uint32_t, MAXPLAYER> _playerTeamNumber;
+    std::array<bool, MAXPLAYER> _playerDefeatFlag;
+    std::array<bool, MAXPLAYER> _playerGameoverFlag;
+    std::array<bool, MAXPLAYER> _playerWinnerFlag;
+
     Reader r;
     Viewer viewer;
     Version version        = Version::Yr;
@@ -382,6 +387,11 @@ inline void Game::initAddrs() {
             bool isGameOver = r.getBool(realPlayerBase + ISGAMEOVEROFFSET);
             bool isWinner   = r.getBool(realPlayerBase + ISWINNEROFFSET);
 
+            _playerTeamNumber[i]   = r.getInt(realPlayerBase + TEAMNUMBEROFFSET);
+            _playerDefeatFlag[i]   = isDefeated;
+            _playerGameoverFlag[i] = isGameOver;
+            _playerWinnerFlag[i]   = isWinner;
+
             if (isDefeated || isGameOver || isWinner) {
                 isThisGameOver = true;
             }
@@ -494,6 +504,11 @@ inline void Game::initArrays() {
     _statusInfos   = std::array<tagStatusInfo, MAXPLAYER>{};
     _colors        = std::array<std::string, MAXPLAYER>{};
     _colors.fill("0x000000");
+
+    _playerTeamNumber   = std::array<uint32_t, MAXPLAYER>{};
+    _playerDefeatFlag   = std::array<bool, MAXPLAYER>{};
+    _playerGameoverFlag = std::array<bool, MAXPLAYER>{};
+    _playerWinnerFlag   = std::array<bool, MAXPLAYER>{};
 }
 
 inline void Game::initGameInfo() { _gameInfo = tagGameInfo{}; }
@@ -645,9 +660,11 @@ inline void Game::refreshStatusInfos() {
 
         uint32_t addr = _playerBases[i];
 
+        int teamNumber       = r.getInt(addr + TEAMNUMBEROFFSET);
         int infantrySelfHeal = r.getInt(addr + INFANTRYSELFHEALOFFSET);
         int unitSelfHeal     = r.getInt(addr + UNITSELFHEALOFFSET);
 
+        si.teamNumber       = teamNumber;
         si.infantrySelfHeal = infantrySelfHeal;
         si.unitSelfHeal     = unitSelfHeal;
 
@@ -720,6 +737,12 @@ inline void Game::structBuild() {
         _gameInfo.debug.tankBase[i]     = _tanks[i];
         _gameInfo.debug.aircraftBase[i] = _aircrafts[i];
         _gameInfo.debug.houseType[i]    = _houseTypes[i];
+
+        // Info flags
+        _gameInfo.debug.playerTeamNumber[i]   = _playerTeamNumber[i];
+        _gameInfo.debug.playerDefeatFlag[i]   = _playerDefeatFlag[i];
+        _gameInfo.debug.playerGameoverFlag[i] = _playerGameoverFlag[i];
+        _gameInfo.debug.playerWinnerFlag[i]   = _playerWinnerFlag[i];
     }
 }
 

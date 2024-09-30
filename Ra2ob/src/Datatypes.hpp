@@ -27,6 +27,7 @@ struct tagPanelInfo {
 };
 
 struct tagStatusInfo {
+    int teamNumber        = 0;
     bool infantrySelfHeal = false;
     bool unitSelfHeal     = false;
 };
@@ -86,6 +87,10 @@ struct tagDebugInfo {
     std::array<uint32_t, MAXPLAYER> tankBase{};
     std::array<uint32_t, MAXPLAYER> aircraftBase{};
     std::array<uint32_t, MAXPLAYER> houseType{};
+    std::array<uint32_t, MAXPLAYER> playerTeamNumber{};
+    std::array<bool, MAXPLAYER> playerDefeatFlag{};
+    std::array<bool, MAXPLAYER> playerGameoverFlag{};
+    std::array<bool, MAXPLAYER> playerWinnerFlag{};
     tagSetting setting;
 };
 
