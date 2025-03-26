@@ -20,6 +20,9 @@ int main(int argc, char* argv[]) {
 
         if (g._gameInfo.valid) {
             system("cls");
+            if (runMode == 2) {
+                std::cout << "[Debug]" << std::endl;
+            }
             g.viewer.print(g._gameInfo, runMode);
         }
     }

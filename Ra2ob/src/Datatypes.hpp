@@ -27,6 +27,7 @@ struct tagPanelInfo {
 };
 
 struct tagStatusInfo {
+    int teamNumber        = 0;
     bool infantrySelfHeal = false;
     bool unitSelfHeal     = false;
 };
@@ -55,12 +56,35 @@ struct tagBuildingInfo {
     std::vector<tagBuildingNode> list;
 };
 
+struct tagScoreInfo {
+    int kills;
+    int lost;
+    int built;
+};
+
 struct tagPlayer {
     bool valid = false;
     tagStatusInfo status;
     tagPanelInfo panel;
     tagUnitsInfo units;
     tagBuildingInfo building;
+    tagScoreInfo score;
+};
+
+struct tagSetting {
+    int pid              = 0;
+    std::string gamePath = "";
+    std::string platform = "";
+    Version version      = Version::Ra2;
+    bool isReplay        = false;
+    std::string mapName  = "";
+    int screenWidth      = 0;
+    int screenHeight     = 0;
+    bool fullScreen      = false;
+    bool windowed        = false;
+    bool border          = false;
+    std::string display  = "";
+    std::string renderer = "";
 };
 
 struct tagDebugInfo {
@@ -70,14 +94,22 @@ struct tagDebugInfo {
     std::array<uint32_t, MAXPLAYER> tankBase{};
     std::array<uint32_t, MAXPLAYER> aircraftBase{};
     std::array<uint32_t, MAXPLAYER> houseType{};
+    std::array<uint32_t, MAXPLAYER> playerTeamNumber{};
+    std::array<bool, MAXPLAYER> playerDefeatFlag{};
+    std::array<bool, MAXPLAYER> playerGameoverFlag{};
+    std::array<bool, MAXPLAYER> playerWinnerFlag{};
+    tagSetting setting;
 };
 
 struct tagGameInfo {
     bool valid              = false;
     bool isObserver         = false;
     bool isGameOver         = false;
+    bool isGamePaused       = false;
     std::string gameVersion = "Yr";
     int currentFrame        = 0;
+    std::string mapName     = "";
+    std::string mapNameUtf  = "";
     std::array<tagPlayer, MAXPLAYER> players{};
     tagDebugInfo debug;
 };
@@ -247,6 +279,12 @@ inline void Unit::fetchData(Reader r, const std::array<uint32_t, MAXPLAYER>& bas
         uint32_t buf = 0;
 
         r.readMemory(baseOffsets[i] + m_offset, &buf, m_size);
+
+        // Check if the number is valid
+        // [Todo]: Find real cause of abnormal planes' number
+        if (buf > UNITSAFE) {
+            buf = 0;
+        }
         m_value[i] = buf;
     }
 }

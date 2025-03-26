@@ -38,11 +38,30 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
         j["debug"]["tankBase"]     = vecToHex(gi.debug.tankBase);
         j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
         j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
+
+        return j;
     }
 
     if (!(GOODINTENTION || gi.isObserver)) {
+        j["status"] = "Not Observer";
         return j;
     }
+
+    if (gi.currentFrame < 5) {
+        j["status"] = "Preparing";
+        return j;
+    }
+
+    if (gi.isGameOver) {
+        j["status"] = "Gameover";
+        return j;
+    }
+
+    j["status"] = "Running";
+
+    j["game"]["version"]      = gi.gameVersion == "Yr" ? "Yr" : "Ra2";
+    j["game"]["mapName"]      = gi.mapName;
+    j["game"]["currentFrame"] = gi.currentFrame;
 
     for (auto& p : gi.players) {
         json jp;
@@ -58,6 +77,9 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
         jp["panel"]["powerOutput"] = p.panel.powerOutput;
         jp["panel"]["color"]       = "#" + p.panel.color;
         jp["panel"]["country"]     = p.panel.country;
+
+        jp["status"]["infantrySelfHeal"] = p.status.infantrySelfHeal;
+        jp["status"]["unitSelfHeal"]     = p.status.unitSelfHeal;
 
         for (auto& u : p.units.units) {
             json ju;
@@ -84,17 +106,20 @@ inline json Viewer::exportJson(tagGameInfo gi, int mode) {
             json jb;
 
             for (auto& b : p.building.list) {
-                jb["name"]     = b.name;
-                jb["progress"] = b.progress;
-                if (b.progress == 54) {
-                    jb["status"] = "Ready";
-                } else if (b.status == 1) {
-                    jb["status"] = "On Hold";
-                } else {
-                    jb["status"] = "Building";
-                }
-            }
+                json bl;
 
+                bl["name"]     = b.name;
+                bl["progress"] = b.progress;
+                bl["number"]   = b.number;
+                if (b.progress == 54) {
+                    bl["status"] = "Ready";
+                } else if (b.status == 1) {
+                    bl["status"] = "On Hold";
+                } else {
+                    bl["status"] = "Building";
+                }
+                jb["producingList"].push_back(bl);
+            }
             jp["producingList"] = jb;
         }
 
@@ -111,6 +136,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     if (mode == 2) {
         json j;
 
+        std::array<std::string, MAXPLAYER> playerName;
+        for (int i = 0; i < MAXPLAYER; i++) {
+            playerName[i] = gi.players[i].panel.playerName;
+        }
+
         j["debug"]["playerBase"]   = vecToHex(gi.debug.playerBase);
         j["debug"]["buildingBase"] = vecToHex(gi.debug.buildingBase);
         j["debug"]["infantryBase"] = vecToHex(gi.debug.infantryBase);
@@ -118,7 +148,40 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         j["debug"]["aircraftBase"] = vecToHex(gi.debug.aircraftBase);
         j["debug"]["houseType"]    = vecToHex(gi.debug.houseType);
 
-        std::cout << j.dump() << std::endl;
+        j["debug"]["playerTeamNumber"]   = gi.debug.playerTeamNumber;
+        j["debug"]["playerDefeatFlag"]   = gi.debug.playerDefeatFlag;
+        j["debug"]["playerGameoverFlag"] = gi.debug.playerGameoverFlag;
+        j["debug"]["playerWinnerFlag"]   = gi.debug.playerWinnerFlag;
+
+        std::cout << "[pid]          " << gi.debug.setting.pid << std::endl;
+        std::cout << "[gamePath]     " << gi.debug.setting.gamePath << std::endl;
+        std::cout << "[isReplay]     " << gi.debug.setting.isReplay << std::endl;
+        std::cout << "[mapName]      " << gi.debug.setting.mapName << std::endl;
+        std::cout << "[screenSize]   " << gi.debug.setting.screenWidth << "*"
+                  << gi.debug.setting.screenHeight << std::endl;
+        std::cout << "[fullScreen]   " << gi.debug.setting.fullScreen << std::endl;
+        std::cout << "[windowed]     " << gi.debug.setting.windowed << std::endl;
+        std::cout << "[border]       " << gi.debug.setting.border << std::endl;
+        std::cout << "[render]       " << gi.debug.setting.renderer << std::endl;
+        std::cout << "[displayMode]  " << gi.debug.setting.display << std::endl;
+
+        std::cout << "[playerName]   ";
+        for (int i = 0; i < MAXPLAYER; i++) {
+            std::cout << gi.players[i].panel.playerName << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "[playerBase]   " << j["debug"]["playerBase"].dump() << std::endl;
+        std::cout << "[buildingBase] " << j["debug"]["buildingBase"].dump() << std::endl;
+        std::cout << "[infantryBase] " << j["debug"]["infantryBase"].dump() << std::endl;
+        std::cout << "[tankBase]     " << j["debug"]["aircraftBase"].dump() << std::endl;
+        std::cout << "[aircraftBase] " << j["debug"]["aircraftBase"].dump() << std::endl;
+        std::cout << "[houseType]    " << j["debug"]["houseType"].dump() << std::endl;
+
+        std::cout << "[playerTeamNumber]" << j["debug"]["playerTeamNumber"].dump() << std::endl;
+        std::cout << "[playerDefeatFlag]" << j["debug"]["playerDefeatFlag"].dump() << std::endl;
+        std::cout << "[playerGameoverFlag]" << j["debug"]["playerGameoverFlag"].dump() << std::endl;
+        std::cout << "[playerWinnerFlag]" << j["debug"]["playerWinnerFlag"].dump() << std::endl;
+
         return;
     }
 
@@ -139,11 +202,21 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
     std::cout << "Game Version: ";
     if (gi.gameVersion == "Yr") {
-        std::cout << "Yr. | ";
+        std::cout << "Yr | ";
     } else {
-        std::cout << "Ra2. | ";
+        std::cout << "Ra2 | ";
     }
-    std::cout << "Game Frame: " << gi.currentFrame << "\n";
+
+    std::cout << "Map Name: " << gi.mapName << " | ";
+
+    std::cout << "Game Time: " << convertFrameToTimeString(gi.currentFrame, GAMESPEED) << " | ";
+
+    if (gi.isGamePaused) {
+        std::cout << "[Paused]";
+    }
+    std::cout << "\n";
+
+    std::vector<int> teamList;  // 0: no team
 
     for (auto& p : gi.players) {
         if (mode == 0 && !p.valid) {
@@ -165,6 +238,16 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
         std::cout << " Credit: " << p.panel.creditSpent;
 
+        int teamIndex;
+        auto it = std::find(teamList.begin(), teamList.end(), p.status.teamNumber);
+        if (it != teamList.end()) {
+            teamIndex = std::distance(teamList.begin(), it);
+        } else {
+            teamList.push_back(p.status.teamNumber);
+            teamIndex = teamList.size() - 1;
+        }
+        std::cout << " Team: " << teamIndex << " ";
+
         if (p.status.infantrySelfHeal || p.status.unitSelfHeal) {
             std::cout << " Auto Repair: ";
         }
@@ -175,6 +258,9 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             std::cout << "[Tank+] ";
         }
 
+        std::cout << "Kills: " << p.score.kills << " Lost: " << p.score.lost
+                  << " Built: " << p.score.built;
+
         std::cout << "\n";
 
         for (auto& u : p.units.units) {
@@ -182,7 +268,7 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
                 continue;
             }
 
-            if (u.num < 0 || u.num > UNITSAFE) {
+            if (u.num < 0) {
                 continue;
             }
 

@@ -26,7 +26,7 @@ cmake ..
 
 3. Develop with your tools
 
-If you're using Visual Studio, after `Step2` you can open `ra2ob.sln` project. Notice that you need to set ra2ob as start up project (see [Set as Startup Project](https://learn.microsoft.com/en-us/visualstudio/get-started/csharp/run-program?view=vs-2022#start-from-a-project)); Also, set `MANIFESTUAC` to `requireAdministrator` and `Working Folder` to `$(ProjectDir)..` before building this project.
+If you're using Visual Studio, after `Step2` you can open `ra2ob.sln` project. Notice that you need to set ra2ob as start up project (see [Set as Startup Project](https://learn.microsoft.com/en-us/visualstudio/get-started/csharp/run-program?view=vs-2022#start-from-a-project)); Also, `Working Folder` to `$(ProjectDir)..` before building this project.
 
 If you're using Make, just run `make` in `./build` after `Step2` and run the executable file as Administrator.
 

@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "./Viewer.hpp"
-#include "./third_party/inicpp.hpp"
 // clang-format off
 #include <psapi.h> // NOLINT
 #include <TlHelp32.h>
@@ -25,6 +24,7 @@ public:
     void operator=(const Game&) = delete;
 
     void getHandle();
+    DisplayMode getDisplayMode(bool fullscreen, bool windowed, bool border);
     void initAddrs();
 
     void loadNumericsFromJson(std::string filePath = F_PANELOFFSETS);
@@ -40,8 +40,8 @@ public:
     void refreshBuildingInfos();
     void refreshColors();
     void refreshStatusInfos();
-    void refreshGameVersion();
-    void refreshGameFrame();
+    void refreshScoreInfos();
+    void refreshGameInfos();
 
     void structBuild();
 
@@ -60,6 +60,7 @@ public:
 
     std::array<tagBuildingInfo, MAXPLAYER> _buildingInfos;
     std::array<tagStatusInfo, MAXPLAYER> _statusInfos;
+    std::array<tagScoreInfo, MAXPLAYER> _scoreInfos;
 
     std::array<std::string, MAXPLAYER> _colors;
 
@@ -78,9 +79,17 @@ public:
 
     std::array<uint32_t, MAXPLAYER> _houseTypes;
 
+    std::array<uint32_t, MAXPLAYER> _playerTeamNumber;
+    std::array<bool, MAXPLAYER> _playerDefeatFlag;
+    std::array<bool, MAXPLAYER> _playerGameoverFlag;
+    std::array<bool, MAXPLAYER> _playerWinnerFlag;
+
     Reader r;
     Viewer viewer;
-    Version version = Version::Yr;
+    Version version        = Version::Yr;
+    bool isReplay          = false;
+    std::string mapName    = "";
+    std::string mapNameUtf = "";
 
 private:
     Game();
@@ -181,6 +190,14 @@ inline void Game::getHandle() {
         PROCESS_QUERY_INFORMATION | PROCESS_CREATE_THREAD | PROCESS_VM_OPERATION | PROCESS_VM_READ,
         FALSE, pid);
 
+    if (pHandle == nullptr) {
+        std::cerr << "Could not open process\n";
+        r = Reader(nullptr);
+        return;
+    }
+
+    r = Reader(pHandle);
+
 #ifdef UNICODE
     wchar_t exePath[256];
     GetModuleFileNameEx(pHandle, NULL, exePath, sizeof(exePath));
@@ -191,36 +208,153 @@ inline void Game::getHandle() {
     std::string filePath = exePath;
 #endif
 
+    std::string gamePath = filePath;
     std::string destPart = "gamemd-spawn.exe";
-    std::string iniPart  = "spawn.ini";
 
-    filePath = filePath.replace(filePath.find(destPart), destPart.length(), iniPart);
+    // Get info from spawnini
+    std::string spawnini = "spawn.ini";
+    std::string spawniniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), spawnini);
+    destPart = spawnini;
 
-    inicpp::IniManager iniData(filePath);
+    std::string spawniniSettings = "Settings";
+    IniFile sif(spawniniPath, spawniniSettings);
+    std::string gameVersion = "GameVersion";
+    std::string ra2Mode     = "Ra2Mode";
+    std::string recordFile  = "RecordFile";
+    std::string lbMapName   = "LBMapName";
+    std::string uiMapName   = "UIMapName";
 
-    if (iniData["Settings"].isKeyExist("GameVersion")) {
-        std::string gameVersion = iniData["Settings"]["GameVersion"];
-        if (gameVersion == "0") {
-            version = Version::Yr;
-        } else {
+    if (sif.isItemExist(gameVersion)) {
+        if (sif.getItemBool(gameVersion)) {
             version = Version::Ra2;
+        } else {
+            version = Version::Yr;
         }
-    } else if (iniData["Settings"].isKeyExist("Ra2Mode")) {
-        std::string ra2Mode = iniData["Settings"]["Ra2Mode"];
-        if (ra2Mode == "False") {
-            version = Version::Yr;
-        } else {
+    } else if (sif.isItemExist(ra2Mode)) {
+        if (sif.getItemBool(ra2Mode)) {
             version = Version::Ra2;
+        } else {
+            version = Version::Yr;
         }
     }
 
-    if (pHandle == nullptr) {
-        std::cerr << "Could not open process\n";
-        r = Reader(nullptr);
-        return;
+    if (sif.isItemExist(recordFile)) {
+        isReplay = true;
+    } else {
+        isReplay = false;
     }
 
-    r = Reader(pHandle);
+    if (sif.isItemExist(lbMapName)) {
+        mapName = sif.getItem(lbMapName);
+    } else if (sif.isItemExist(uiMapName)) {
+        mapName = sif.getItem(uiMapName);
+    }
+
+    mapNameUtf = utf16ToUtf8(gbkToUtf16(mapName.c_str()).c_str());
+
+    // Get info from RA2MD.ini
+    std::string ra2mdini = "RA2MD.ini";
+    std::string ra2mdiniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), ra2mdini);
+    destPart = ra2mdini;
+
+    std::string ra2mdiniSettings = "Video";
+    IniFile rif(ra2mdiniPath, ra2mdiniSettings);
+    std::string screenWidth  = "ScreenWidth";
+    std::string screenHeight = "ScreenHeight";
+    int sw                   = 0;
+    int sh                   = 0;
+
+    if (rif.isItemExist(screenWidth)) {
+        sw = rif.getItemInt(screenWidth);
+    }
+
+    if (rif.isItemExist(screenHeight)) {
+        sh = rif.getItemInt(screenHeight);
+    }
+
+    // Get info from ddraw.ini
+    std::string ddrawini = "ddraw.ini";
+    std::string ddrawiniPath =
+        filePath.replace(filePath.find(destPart), destPart.length(), ddrawini);
+    destPart = ddrawini;
+
+    std::string ddrawiniSettings = "ddraw";
+    IniFile dif(ddrawiniPath, ddrawiniSettings);
+    std::string fullScreen = "fullscreen";
+    std::string windowed   = "windowed";
+    std::string border     = "border";
+    std::string renderer   = "renderer";
+
+    bool fs_bool  = false;
+    bool win_bool = false;
+    bool bor_bool = false;
+    std::string renderer_string;
+
+    if (dif.isItemExist(fullScreen)) {
+        fs_bool = dif.getItemBool(fullScreen);
+    }
+
+    if (dif.isItemExist(windowed)) {
+        win_bool = dif.getItemBool(windowed);
+    }
+
+    if (dif.isItemExist(border)) {
+        bor_bool = dif.getItemBool(border);
+    }
+
+    if (dif.isItemExist(renderer)) {
+        renderer_string = dif.getItem(renderer);
+    }
+
+    DisplayMode dm = getDisplayMode(fs_bool, win_bool, bor_bool);
+
+    _gameInfo.debug.setting.pid          = pid;
+    _gameInfo.debug.setting.gamePath     = gamePath;
+    _gameInfo.debug.setting.platform     = "";
+    _gameInfo.debug.setting.version      = version;
+    _gameInfo.debug.setting.isReplay     = isReplay;
+    _gameInfo.debug.setting.mapName      = mapName;
+    _gameInfo.debug.setting.screenWidth  = sw;
+    _gameInfo.debug.setting.screenHeight = sh;
+    _gameInfo.debug.setting.fullScreen   = fs_bool;
+    _gameInfo.debug.setting.windowed     = win_bool;
+    _gameInfo.debug.setting.border       = bor_bool;
+    _gameInfo.debug.setting.renderer     = renderer_string;
+
+    switch (dm) {
+        case DisplayMode::Fullscreen:
+            _gameInfo.debug.setting.display = "Fullscreen Exclusive";
+            break;
+        case DisplayMode::Windowed:
+            _gameInfo.debug.setting.display = "Windowed";
+            break;
+        case DisplayMode::BorderlessWindowed:
+            _gameInfo.debug.setting.display = "Borderless Windowed";
+            break;
+        case DisplayMode::StretchedFullscreen:
+            _gameInfo.debug.setting.display = "Stretched Fullscreen";
+            break;
+        default:
+            _gameInfo.debug.setting.display = "Unknown Displaymode";
+    }
+}
+
+inline DisplayMode Game::getDisplayMode(bool fullscreen, bool windowed, bool border) {
+    if (!windowed) {
+        return DisplayMode::Fullscreen;
+    } else if (!fullscreen) {
+        if (border) {
+            return DisplayMode::Windowed;
+        } else {
+            return DisplayMode::BorderlessWindowed;
+        }
+    } else if (fullscreen) {
+        return DisplayMode::StretchedFullscreen;
+    } else {
+        return DisplayMode::Unknown;
+    }
 }
 
 /**
@@ -235,9 +369,8 @@ inline void Game::initAddrs() {
     uint32_t classBaseArray     = r.getAddr(CLASSBASEARRAYOFFSET);
     uint32_t playerBaseArrayPtr = fixed + PLAYERBASEARRAYPTROFFSET;
 
-    bool isObserverFlag   = true;
-    bool isAllControlable = true;
-    bool isThisGameOver   = false;
+    bool isObserverFlag = true;
+    bool isThisGameOver = false;
 
     for (int i = 0; i < MAXPLAYER; i++, playerBaseArrayPtr += 4) {
         uint32_t playerBase = r.getAddr(playerBaseArrayPtr);
@@ -246,18 +379,20 @@ inline void Game::initAddrs() {
 
         if (playerBase != INVALIDCLASS) {
             uint32_t realPlayerBase = r.getAddr(playerBase * 4 + classBaseArray);
+            int cur_c               = r.getInt(realPlayerBase + CURRENTPLAYEROFFSET);
 
-            bool cur          = r.getBool(realPlayerBase + CURRENTPLAYEROFFSET);
-            std::string cur_s = r.getString(realPlayerBase + STRNAMEOFFSET);
-            if (cur) {
+            if (cur_c == 0x1010000 || cur_c == 0x101) {
                 isObserverFlag = false;
-            } else {
-                isAllControlable = false;
             }
 
             bool isDefeated = r.getBool(realPlayerBase + ISDEFEATEDOFFSET);
             bool isGameOver = r.getBool(realPlayerBase + ISGAMEOVEROFFSET);
             bool isWinner   = r.getBool(realPlayerBase + ISWINNEROFFSET);
+
+            _playerTeamNumber[i]   = r.getInt(realPlayerBase + TEAMNUMBEROFFSET);
+            _playerDefeatFlag[i]   = isDefeated;
+            _playerGameoverFlag[i] = isGameOver;
+            _playerWinnerFlag[i]   = isWinner;
 
             if (isDefeated || isGameOver || isWinner) {
                 isThisGameOver = true;
@@ -280,7 +415,7 @@ inline void Game::initAddrs() {
         }
     }
 
-    _gameInfo.isObserver = isObserverFlag || isAllControlable;
+    _gameInfo.isObserver = isObserverFlag || isReplay;
     _gameInfo.isGameOver = isThisGameOver;
 }
 
@@ -369,24 +504,17 @@ inline void Game::initArrays() {
     _houseTypes    = std::array<uint32_t, MAXPLAYER>{};
     _buildingInfos = std::array<tagBuildingInfo, MAXPLAYER>{};
     _statusInfos   = std::array<tagStatusInfo, MAXPLAYER>{};
+    _scoreInfos    = std::array<tagScoreInfo, MAXPLAYER>{};
     _colors        = std::array<std::string, MAXPLAYER>{};
     _colors.fill("0x000000");
+
+    _playerTeamNumber   = std::array<uint32_t, MAXPLAYER>{};
+    _playerDefeatFlag   = std::array<bool, MAXPLAYER>{};
+    _playerGameoverFlag = std::array<bool, MAXPLAYER>{};
+    _playerWinnerFlag   = std::array<bool, MAXPLAYER>{};
 }
 
-inline void Game::initGameInfo() {
-    _gameInfo.valid              = false;
-    _gameInfo.isObserver         = false;
-    _gameInfo.isGameOver         = false;
-    _gameInfo.gameVersion        = "Yr";
-    _gameInfo.currentFrame       = 0;
-    _gameInfo.players            = std::array<tagPlayer, MAXPLAYER>{};
-    _gameInfo.debug.playerBase   = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.buildingBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.infantryBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.tankBase     = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.aircraftBase = std::array<uint32_t, MAXPLAYER>{};
-    _gameInfo.debug.houseType    = std::array<uint32_t, MAXPLAYER>{};
-}
+inline void Game::initGameInfo() { _gameInfo = tagGameInfo{}; }
 
 /**
  * Return valid player number.
@@ -438,8 +566,9 @@ inline void Game::refreshInfo() {
     refreshBuildingInfos();
     refreshColors();
     refreshStatusInfos();
-    refreshGameVersion();
-    refreshGameFrame();
+    refreshScoreInfos();
+
+    refreshGameInfos();
 }
 
 inline void Game::getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1,
@@ -535,9 +664,11 @@ inline void Game::refreshStatusInfos() {
 
         uint32_t addr = _playerBases[i];
 
+        int teamNumber       = r.getInt(addr + TEAMNUMBEROFFSET);
         int infantrySelfHeal = r.getInt(addr + INFANTRYSELFHEALOFFSET);
         int unitSelfHeal     = r.getInt(addr + UNITSELFHEALOFFSET);
 
+        si.teamNumber       = teamNumber;
         si.infantrySelfHeal = infantrySelfHeal;
         si.unitSelfHeal     = unitSelfHeal;
 
@@ -545,15 +676,62 @@ inline void Game::refreshStatusInfos() {
     }
 }
 
-inline void Game::refreshGameVersion() {
+inline void Game::refreshScoreInfos() {
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!_players[i]) {
+            continue;
+        }
+
+        tagScoreInfo si;
+        uint32_t addr = _playerBases[i];
+
+        int totalKills               = 0;
+        uint32_t killedUnitsBase     = addr + KILLEDUNITSOFHOUSES;
+        uint32_t killedBuildingsBase = addr + KILLEDBUILDINGSOFHOUSES;
+
+        for (int j = 0; j < 20; j++) {
+            totalKills += r.getInt(killedUnitsBase + j * 4);
+            totalKills += r.getInt(killedBuildingsBase + j * 4);
+        }
+        si.kills = totalKills;
+
+        int totalKilledUnits     = r.getInt(addr + TOTALKILLEDUNITS);
+        int totalKilledBuildings = r.getInt(addr + TOTALKILLEDBUILDINGS);
+        si.lost                  = totalKilledUnits + totalKilledBuildings;
+
+        int factoryProducedBuildingTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDBUILDINGTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedUnitTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDUNITTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedInfantryTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDINFANTRYTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedAircraftTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDAIRCRAFTTYPES + FACTORYTYPESOFFSET);
+
+        int totalBuilt = factoryProducedBuildingTypesCount + factoryProducedUnitTypesCount +
+                         factoryProducedInfantryTypesCount + factoryProducedAircraftTypesCount +
+                         totalKilledUnits + totalKilledBuildings;
+
+        si.built = totalBuilt;
+
+        _scoreInfos[i] = si;
+    }
+}
+
+inline void Game::refreshGameInfos() {
     if (version == Version::Yr) {
         _gameInfo.gameVersion = "Yr";
     } else {
         _gameInfo.gameVersion = "Ra2";
     }
-}
 
-inline void Game::refreshGameFrame() { _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET); }
+    _gameInfo.currentFrame = r.getInt(GAMEFRAMEOFFSET);
+
+    _gameInfo.mapName    = mapName;
+    _gameInfo.mapNameUtf = mapNameUtf;
+
+    _gameInfo.isGamePaused = r.getBool(GAMEPAUSEOFFSET);
+}
 
 inline void Game::structBuild() {
     for (int i = 0; i < MAXPLAYER; i++) {
@@ -596,6 +774,7 @@ inline void Game::structBuild() {
         p.units    = ui;
         p.building = _buildingInfos[i];
         p.status   = _statusInfos[i];
+        p.score    = _scoreInfos[i];
 
         // Game info
         _gameInfo.players[i]            = p;
@@ -605,6 +784,12 @@ inline void Game::structBuild() {
         _gameInfo.debug.tankBase[i]     = _tanks[i];
         _gameInfo.debug.aircraftBase[i] = _aircrafts[i];
         _gameInfo.debug.houseType[i]    = _houseTypes[i];
+
+        // Info flags
+        _gameInfo.debug.playerTeamNumber[i]   = _playerTeamNumber[i];
+        _gameInfo.debug.playerDefeatFlag[i]   = _playerDefeatFlag[i];
+        _gameInfo.debug.playerGameoverFlag[i] = _playerGameoverFlag[i];
+        _gameInfo.debug.playerWinnerFlag[i]   = _playerWinnerFlag[i];
     }
 }
 

@@ -9,6 +9,7 @@ namespace Ra2ob {
 // Basic game information
 
 constexpr int MAXPLAYER    = 8;
+constexpr int GAMESPEED    = 59;
 constexpr int INVALIDCLASS = 0xffffffffu;
 
 // Memory size
@@ -23,7 +24,9 @@ constexpr int STRUNITNAMESIZE = 0x20;
 
 // Basic offsets
 
+constexpr int GAMEPAUSEOFFSET          = 0xa8ed8c;
 constexpr int GAMEFRAMEOFFSET          = 0xa8ed84;
+constexpr int GAMETIMEOFFSET           = 0xabcd4c;
 constexpr int FIXEDOFFSET              = 0xa8b230;
 constexpr int CLASSBASEARRAYOFFSET     = 0xa8022c;
 constexpr int PLAYERBASEARRAYPTROFFSET = 0x1180;
@@ -32,10 +35,21 @@ constexpr int HOUSETYPEOFFSET        = 0x34;
 constexpr int COLOROFFSET            = 0x56F9;
 constexpr int INFANTRYSELFHEALOFFSET = 0x164;
 constexpr int UNITSELFHEALOFFSET     = 0x168;
+constexpr int TEAMNUMBEROFFSET       = 0x1d8;
 constexpr int CURRENTPLAYEROFFSET    = 0x1ec;
 constexpr int ISDEFEATEDOFFSET       = 0x1f5;
 constexpr int ISGAMEOVEROFFSET       = 0x1f6;
 constexpr int ISWINNEROFFSET         = 0x1f7;
+
+constexpr int KILLEDUNITSOFHOUSES          = 0x53e4;
+constexpr int KILLEDBUILDINGSOFHOUSES      = 0x5438;
+constexpr int TOTALKILLEDUNITS             = 0x5488;
+constexpr int TOTALKILLEDBUILDINGS         = 0x5434;
+constexpr int FACTORYTYPESOFFSET           = 0x10;
+constexpr int FACTORYPRODUCEDBUILDINGTYPES = 0x55a0;
+constexpr int FACTORYPRODUCEDUNITTYPES     = 0x55b4;
+constexpr int FACTORYPRODUCEDINFANTRYTYPES = 0x55c8;
+constexpr int FACTORYPRODUCEDAIRCRAFTTYPES = 0x55dc;
 
 constexpr int BUILDINGOFFSET = 0x5554;
 constexpr int TANKOFFSET     = 0x5568;
@@ -148,6 +162,13 @@ const std::map<std::string, std::string> COUNTRYMAP = {
 
 enum class UnitType : int { Building = 4, Tank = 3, Infantry = 2, Aircraft = 1, Unknown = 0 };
 enum class Version : int { Yr = 1, Ra2 = 0 };
+enum class DisplayMode : int {
+    Fullscreen          = 4,
+    Windowed            = 3,
+    BorderlessWindowed  = 2,
+    StretchedFullscreen = 1,
+    Unknown             = 0,
+};
 
 // Files
 
@@ -161,7 +182,7 @@ constexpr int RULER_MULT   = 20;
 
 // Limitation
 
-constexpr bool GOODINTENTION = false;
+constexpr bool GOODINTENTION = true;
 
 }  // end of namespace Ra2ob
 
