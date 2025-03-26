@@ -41,6 +41,16 @@ constexpr int ISDEFEATEDOFFSET       = 0x1f5;
 constexpr int ISGAMEOVEROFFSET       = 0x1f6;
 constexpr int ISWINNEROFFSET         = 0x1f7;
 
+constexpr int KILLEDUNITSOFHOUSES          = 0x53e4;
+constexpr int KILLEDBUILDINGSOFHOUSES      = 0x5438;
+constexpr int TOTALKILLEDUNITS             = 0x5488;
+constexpr int TOTALKILLEDBUILDINGS         = 0x5434;
+constexpr int FACTORYTYPESOFFSET           = 0x10;
+constexpr int FACTORYPRODUCEDBUILDINGTYPES = 0x55a0;
+constexpr int FACTORYPRODUCEDUNITTYPES     = 0x55b4;
+constexpr int FACTORYPRODUCEDINFANTRYTYPES = 0x55c8;
+constexpr int FACTORYPRODUCEDAIRCRAFTTYPES = 0x55dc;
+
 constexpr int BUILDINGOFFSET = 0x5554;
 constexpr int TANKOFFSET     = 0x5568;
 constexpr int INFANTRYOFFSET = 0x557c;
@@ -172,7 +182,7 @@ constexpr int RULER_MULT   = 20;
 
 // Limitation
 
-constexpr bool GOODINTENTION = false;
+constexpr bool GOODINTENTION = true;
 
 }  // end of namespace Ra2ob
 

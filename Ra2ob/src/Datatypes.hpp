@@ -56,12 +56,19 @@ struct tagBuildingInfo {
     std::vector<tagBuildingNode> list;
 };
 
+struct tagScoreInfo {
+    int kills;
+    int lost;
+    int built;
+};
+
 struct tagPlayer {
     bool valid = false;
     tagStatusInfo status;
     tagPanelInfo panel;
     tagUnitsInfo units;
     tagBuildingInfo building;
+    tagScoreInfo score;
 };
 
 struct tagSetting {

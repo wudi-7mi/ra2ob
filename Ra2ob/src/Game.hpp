@@ -40,6 +40,7 @@ public:
     void refreshBuildingInfos();
     void refreshColors();
     void refreshStatusInfos();
+    void refreshScoreInfos();
     void refreshGameInfos();
 
     void structBuild();
@@ -59,6 +60,7 @@ public:
 
     std::array<tagBuildingInfo, MAXPLAYER> _buildingInfos;
     std::array<tagStatusInfo, MAXPLAYER> _statusInfos;
+    std::array<tagScoreInfo, MAXPLAYER> _scoreInfos;
 
     std::array<std::string, MAXPLAYER> _colors;
 
@@ -502,6 +504,7 @@ inline void Game::initArrays() {
     _houseTypes    = std::array<uint32_t, MAXPLAYER>{};
     _buildingInfos = std::array<tagBuildingInfo, MAXPLAYER>{};
     _statusInfos   = std::array<tagStatusInfo, MAXPLAYER>{};
+    _scoreInfos    = std::array<tagScoreInfo, MAXPLAYER>{};
     _colors        = std::array<std::string, MAXPLAYER>{};
     _colors.fill("0x000000");
 
@@ -563,6 +566,7 @@ inline void Game::refreshInfo() {
     refreshBuildingInfos();
     refreshColors();
     refreshStatusInfos();
+    refreshScoreInfos();
 
     refreshGameInfos();
 }
@@ -672,6 +676,48 @@ inline void Game::refreshStatusInfos() {
     }
 }
 
+inline void Game::refreshScoreInfos() {
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!_players[i]) {
+            continue;
+        }
+
+        tagScoreInfo si;
+        uint32_t addr = _playerBases[i];
+
+        int totalKills               = 0;
+        uint32_t killedUnitsBase     = addr + KILLEDUNITSOFHOUSES;
+        uint32_t killedBuildingsBase = addr + KILLEDBUILDINGSOFHOUSES;
+
+        for (int j = 0; j < 20; j++) {
+            totalKills += r.getInt(killedUnitsBase + j * 4);
+            totalKills += r.getInt(killedBuildingsBase + j * 4);
+        }
+        si.kills = totalKills;
+
+        int totalKilledUnits     = r.getInt(addr + TOTALKILLEDUNITS);
+        int totalKilledBuildings = r.getInt(addr + TOTALKILLEDBUILDINGS);
+        si.lost                  = totalKilledUnits + totalKilledBuildings;
+
+        int factoryProducedBuildingTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDBUILDINGTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedUnitTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDUNITTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedInfantryTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDINFANTRYTYPES + FACTORYTYPESOFFSET);
+        int factoryProducedAircraftTypesCount =
+            r.getInt(addr + FACTORYPRODUCEDAIRCRAFTTYPES + FACTORYTYPESOFFSET);
+
+        int totalBuilt = factoryProducedBuildingTypesCount + factoryProducedUnitTypesCount +
+                         factoryProducedInfantryTypesCount + factoryProducedAircraftTypesCount +
+                         totalKilledUnits + totalKilledBuildings;
+
+        si.built = totalBuilt;
+
+        _scoreInfos[i] = si;
+    }
+}
+
 inline void Game::refreshGameInfos() {
     if (version == Version::Yr) {
         _gameInfo.gameVersion = "Yr";
@@ -728,6 +774,7 @@ inline void Game::structBuild() {
         p.units    = ui;
         p.building = _buildingInfos[i];
         p.status   = _statusInfos[i];
+        p.score    = _scoreInfos[i];
 
         // Game info
         _gameInfo.players[i]            = p;

@@ -258,6 +258,9 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             std::cout << "[Tank+] ";
         }
 
+        std::cout << "Kills: " << p.score.kills << " Lost: " << p.score.lost
+                  << " Built: " << p.score.built;
+
         std::cout << "\n";
 
         for (auto& u : p.units.units) {
