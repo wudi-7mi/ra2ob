@@ -667,6 +667,10 @@ inline void Game::refreshSuperTimer() {
                 }
                 int currentFrame = r.getInt(GAMEFRAMEOFFSET);
                 sn.left          = left - (currentFrame - start);
+                if (sn.left <= 0) {
+                    sn.left   = 0;
+                    sn.status = 2;
+                }
                 sts[j].list.push_back(sn);
             }
         }
