@@ -263,6 +263,18 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
         std::cout << "\n";
 
+        if (!p.superTimer.list.empty()) {
+            std::cout << "Super Weapons: ";
+            for (auto& s : p.superTimer.list) {
+                if (s.status == 1) {
+                    std::cout << s.name << ": On Hold | ";
+                    continue;
+                }
+                std::cout << s.name << ": " << converFrameToGameTimeString(s.left) << " | ";
+            }
+            std::cout << "\n";
+        }
+
         for (auto& u : p.units.units) {
             if (mode == 0 && u.num == 0) {
                 continue;

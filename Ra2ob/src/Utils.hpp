@@ -119,6 +119,18 @@ inline std::string convertFrameToTimeString(int frame, int framePerSecond) {
     return ss.str();
 }
 
+inline std::string converFrameToGameTimeString(int frame) {
+    int totalSeconds = frame / 15;
+
+    int minutes = totalSeconds / 60;
+    int seconds = totalSeconds % 60;
+
+    std::stringstream ss;
+    ss << std::setfill('0') << std::setw(2) << minutes << ":" << std::setw(2) << seconds;
+
+    return ss.str();
+}
+
 }  // end of namespace Ra2ob
 
 #endif  // RA2OB_SRC_UTILS_HPP_

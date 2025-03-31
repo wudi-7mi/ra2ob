@@ -38,6 +38,7 @@ public:
     void refreshInfo();
     void getBuildingInfo(tagBuildingInfo* bi, int addr, int offset_0, int offset_1, UnitType utype);
     void refreshBuildingInfos();
+    void refreshSuperTimer();
     void refreshColors();
     void refreshStatusInfos();
     void refreshScoreInfos();
@@ -59,6 +60,7 @@ public:
     StrCountry _strCountry;
 
     std::array<tagBuildingInfo, MAXPLAYER> _buildingInfos;
+    std::array<tagSuperTimer, MAXPLAYER> _superTimers;
     std::array<tagStatusInfo, MAXPLAYER> _statusInfos;
     std::array<tagScoreInfo, MAXPLAYER> _scoreInfos;
 
@@ -503,6 +505,7 @@ inline void Game::initArrays() {
 
     _houseTypes    = std::array<uint32_t, MAXPLAYER>{};
     _buildingInfos = std::array<tagBuildingInfo, MAXPLAYER>{};
+    _superTimers   = std::array<tagSuperTimer, MAXPLAYER>{};
     _statusInfos   = std::array<tagStatusInfo, MAXPLAYER>{};
     _scoreInfos    = std::array<tagScoreInfo, MAXPLAYER>{};
     _colors        = std::array<std::string, MAXPLAYER>{};
@@ -564,6 +567,7 @@ inline void Game::refreshInfo() {
     _strCountry.fetchData(r, _houseTypes);
 
     refreshBuildingInfos();
+    refreshSuperTimer();
     refreshColors();
     refreshStatusInfos();
     refreshScoreInfos();
@@ -635,6 +639,40 @@ inline void Game::refreshBuildingInfos() {
 
         _buildingInfos[i] = bi;
     }
+}
+
+inline void Game::refreshSuperTimer() {
+    int superNums = r.getInt(SUPERTIMEROFFSET + SUPERTIMERNUMSOFFSET);
+
+    uint32_t vectorAddr = r.getAddr(SUPERTIMEROFFSET + SUPERTIMEVECTOROFFSET);
+    std::array<tagSuperTimer, MAXPLAYER> sts;
+
+    for (int i = 0; i < superNums; i++) {
+        uint32_t curAddr = r.getAddr(vectorAddr + i * 4);
+        int start        = r.getInt(curAddr + SUPERTIMESTARTOFFSET);
+        int left         = r.getInt(curAddr + SUPERTIMELEFTOFFSET);
+        uint32_t owner   = r.getAddr(curAddr + SUPERTIMEOWNEROFFSET);
+
+        uint32_t typeAddr = r.getAddr(curAddr + SUPERTIMETYPEOFFSET);
+        int duration      = r.getInt(typeAddr + SUPERTIMEDURATIONOFFSET);
+        std::string name  = r.getString(typeAddr + SUPERTIMENAMEOFFSET);
+
+        for (int j = 0; j < MAXPLAYER; j++) {
+            if (owner == _playerBases[j]) {
+                tagSuperNode sn(name, duration);
+                if (start == -1) {
+                    sn.status = 1;
+                    sts[j].list.push_back(sn);
+                    continue;
+                }
+                int currentFrame = r.getInt(GAMEFRAMEOFFSET);
+                sn.left          = left - (currentFrame - start);
+                sts[j].list.push_back(sn);
+            }
+        }
+    }
+
+    _superTimers = sts;
 }
 
 inline void Game::refreshColors() {
@@ -769,12 +807,13 @@ inline void Game::structBuild() {
                   [](const tagUnitSingle& a, const tagUnitSingle& b) { return a.index < b.index; });
 
         // Players info
-        p.valid    = true;
-        p.panel    = pi;
-        p.units    = ui;
-        p.building = _buildingInfos[i];
-        p.status   = _statusInfos[i];
-        p.score    = _scoreInfos[i];
+        p.valid      = true;
+        p.panel      = pi;
+        p.units      = ui;
+        p.building   = _buildingInfos[i];
+        p.superTimer = _superTimers[i];
+        p.status     = _statusInfos[i];
+        p.score      = _scoreInfos[i];
 
         // Game info
         _gameInfo.players[i]            = p;

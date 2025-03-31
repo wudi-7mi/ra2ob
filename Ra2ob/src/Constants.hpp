@@ -29,6 +29,7 @@ constexpr int GAMEFRAMEOFFSET          = 0xa8ed84;
 constexpr int GAMETIMEOFFSET           = 0xabcd4c;
 constexpr int FIXEDOFFSET              = 0xa8b230;
 constexpr int CLASSBASEARRAYOFFSET     = 0xa8022c;
+constexpr int SUPERTIMEROFFSET         = 0xa83d50;
 constexpr int PLAYERBASEARRAYPTROFFSET = 0x1180;
 
 constexpr int HOUSETYPEOFFSET        = 0x34;
@@ -63,6 +64,21 @@ constexpr int WINOFFSET  = 0x1f7;
 constexpr int LOSEOFFSET = 0x1f8;
 
 constexpr int UNITSAFE = 4096;
+
+// Super Timer Offsets
+
+constexpr int SUPERTIMERNUMSOFFSET = 0x10;
+
+constexpr int SUPERTIMEVECTOROFFSET = 0x4;
+
+constexpr int SUPERTIMESTARTOFFSET = 0x30;
+constexpr int SUPERTIMEOWNEROFFSET = 0x2c;
+constexpr int SUPERTIMETYPEOFFSET  = 0x28;
+constexpr int SUPERTIMELEFTOFFSET  = 0x38;
+constexpr int SUPERONHOLDOFFSET    = 0x70;
+
+constexpr int SUPERTIMENAMEOFFSET     = 0x64;
+constexpr int SUPERTIMEDURATIONOFFSET = 0xb0;
 
 // Production Offsets
 

@@ -52,8 +52,24 @@ struct tagBuildingNode {
     explicit tagBuildingNode(std::string n) { name = n; }
 };
 
+struct tagSuperNode {
+    std::string name;
+    int total;
+    int left   = 0;
+    int status = 0;  // 0 - normal, 1 - onhold.
+
+    explicit tagSuperNode(std::string n, int t) {
+        name  = n;
+        total = t;
+    }
+};
+
 struct tagBuildingInfo {
     std::vector<tagBuildingNode> list;
+};
+
+struct tagSuperTimer {
+    std::vector<tagSuperNode> list;
 };
 
 struct tagScoreInfo {
@@ -68,6 +84,7 @@ struct tagPlayer {
     tagPanelInfo panel;
     tagUnitsInfo units;
     tagBuildingInfo building;
+    tagSuperTimer superTimer;
     tagScoreInfo score;
 };
 
