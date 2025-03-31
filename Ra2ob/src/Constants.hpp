@@ -198,7 +198,7 @@ constexpr int RULER_MULT   = 20;
 
 // Limitation
 
-constexpr bool GOODINTENTION = true;
+constexpr bool GOODINTENTION = false;
 
 }  // end of namespace Ra2ob
 

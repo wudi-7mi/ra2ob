@@ -396,7 +396,7 @@ inline void Game::initAddrs() {
             _playerGameoverFlag[i] = isGameOver;
             _playerWinnerFlag[i]   = isWinner;
 
-            if (isDefeated || isGameOver || isWinner) {
+            if (isGameOver || isWinner) {
                 isThisGameOver = true;
             }
 
@@ -769,6 +769,23 @@ inline void Game::refreshGameInfos() {
     _gameInfo.mapNameUtf = mapNameUtf;
 
     _gameInfo.isGamePaused = r.getBool(GAMEPAUSEOFFSET);
+
+    int playersNum         = 0;
+    int defeatedPlayersNum = 0;
+
+    for (int i = 0; i < MAXPLAYER; i++) {
+        if (!_players[i] || _strCountry.getValueByIndex(i) == "") {
+            continue;
+        }
+        playersNum++;
+
+        if (_gameInfo.debug.playerDefeatFlag[i]) {
+            defeatedPlayersNum++;
+        }
+    }
+
+    _gameInfo.allPlayers  = playersNum;
+    _gameInfo.leftPlayers = playersNum - defeatedPlayersNum;
 }
 
 inline void Game::structBuild() {
