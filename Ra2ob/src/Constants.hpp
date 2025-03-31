@@ -51,6 +51,10 @@ constexpr int FACTORYPRODUCEDBUILDINGTYPES = 0x55a0;
 constexpr int FACTORYPRODUCEDUNITTYPES     = 0x55b4;
 constexpr int FACTORYPRODUCEDINFANTRYTYPES = 0x55c8;
 constexpr int FACTORYPRODUCEDAIRCRAFTTYPES = 0x55dc;
+constexpr int ALLIVEBUILDINGTYPES          = 0x5550;
+constexpr int ALLIVEUNITTYPES              = 0x5564;
+constexpr int ALLIVEINFANTRYTYPES          = 0x5578;
+constexpr int ALLIVEAIRCRAFTTYPES          = 0x558c;
 
 constexpr int BUILDINGOFFSET = 0x5554;
 constexpr int TANKOFFSET     = 0x5568;
