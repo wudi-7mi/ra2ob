@@ -56,7 +56,7 @@ struct tagSuperNode {
     std::string name;
     int total;
     int left   = 0;
-    int status = 0;  // 0 - normal, 1 - onhold.
+    int status = 0;  // 0 - normal, 1 - onhold, 2 - ready.
 
     explicit tagSuperNode(std::string n, int t) {
         name  = n;
