@@ -212,8 +212,11 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
     std::cout << "Game Time: " << convertFrameToTimeString(gi.currentFrame, GAMESPEED) << " | ";
 
     if (gi.isGamePaused) {
-        std::cout << "[Paused]";
+        std::cout << "[Paused]"
+                  << " ";
     }
+
+    std::cout << "Survivors/All: " << gi.leftPlayers << "/" << gi.allPlayers;
     std::cout << "\n";
 
     std::vector<int> teamList;  // 0: no team
@@ -222,6 +225,16 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         if (mode == 0 && !p.valid) {
             continue;
         }
+
+        int teamIndex;
+        auto it = std::find(teamList.begin(), teamList.end(), p.status.teamNumber);
+        if (it != teamList.end()) {
+            teamIndex = std::distance(teamList.begin(), it);
+        } else {
+            teamList.push_back(p.status.teamNumber);
+            teamIndex = teamList.size() - 1;
+        }
+        std::cout << "Team" << teamIndex << " ";
 
         int cval = std::stoi(p.panel.color, 0, 16);
 
@@ -235,18 +248,8 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
 
         std::cout << " " << p.panel.country;
         std::cout << " Balance: " << p.panel.balance;
-        std::cout << " Power: " << p.panel.powerDrain << " / " << p.panel.powerOutput;
+        std::cout << " Power: " << p.panel.powerDrain << "/" << p.panel.powerOutput;
         std::cout << " Credit: " << p.panel.creditSpent;
-
-        int teamIndex;
-        auto it = std::find(teamList.begin(), teamList.end(), p.status.teamNumber);
-        if (it != teamList.end()) {
-            teamIndex = std::distance(teamList.begin(), it);
-        } else {
-            teamList.push_back(p.status.teamNumber);
-            teamIndex = teamList.size() - 1;
-        }
-        std::cout << " Team: " << teamIndex << " ";
 
         if (p.status.infantrySelfHeal || p.status.unitSelfHeal) {
             std::cout << " Auto Repair: ";
@@ -258,10 +261,22 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             std::cout << "[Tank+] ";
         }
 
-        std::cout << "Kills: " << p.score.kills << " Lost: " << p.score.lost
-                  << " Built: " << p.score.built;
+        std::cout << " Kills/Lost/Built: " << p.score.kills << "/" << p.score.lost << "/"
+                  << p.score.built;
 
         std::cout << "\n";
+
+        if (!p.superTimer.list.empty()) {
+            std::cout << "Super Weapons: ";
+            for (auto& s : p.superTimer.list) {
+                if (s.status == 1) {
+                    std::cout << s.name << ": On Hold | ";
+                    continue;
+                }
+                std::cout << s.name << ": " << converFrameToGameTimeString(s.left) << " | ";
+            }
+            std::cout << "\n";
+        }
 
         for (auto& u : p.units.units) {
             if (mode == 0 && u.num == 0) {
