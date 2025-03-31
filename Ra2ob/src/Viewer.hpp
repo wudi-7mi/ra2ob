@@ -215,8 +215,6 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
         std::cout << "[Paused]"
                   << " ";
     }
-
-    std::cout << "Survivors/All: " << gi.leftPlayers << "/" << gi.allPlayers;
     std::cout << "\n";
 
     std::vector<int> teamList;  // 0: no team
@@ -261,8 +259,8 @@ inline void Viewer::print(tagGameInfo gi, int mode, int indent) {
             std::cout << "[Tank+] ";
         }
 
-        std::cout << " Kills/Lost/Built: " << p.score.kills << "/" << p.score.lost << "/"
-                  << p.score.built;
+        std::cout << " Kills/Lost/Built/Alive: " << p.score.kills << "/" << p.score.lost << "/"
+                  << p.score.built << "/" << p.score.alive;
 
         std::cout << "\n";
 

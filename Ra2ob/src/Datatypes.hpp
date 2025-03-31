@@ -76,6 +76,7 @@ struct tagScoreInfo {
     int kills;
     int lost;
     int built;
+    int alive;
 };
 
 struct tagPlayer {

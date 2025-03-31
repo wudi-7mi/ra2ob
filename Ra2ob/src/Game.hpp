@@ -746,11 +746,18 @@ inline void Game::refreshScoreInfos() {
         int factoryProducedAircraftTypesCount =
             r.getInt(addr + FACTORYPRODUCEDAIRCRAFTTYPES + FACTORYTYPESOFFSET);
 
+        int alliveUnitTypes     = r.getInt(addr + ALLIVEUNITTYPES + FACTORYTYPESOFFSET);
+        int alliveInfantryTypes = r.getInt(addr + ALLIVEINFANTRYTYPES + FACTORYTYPESOFFSET);
+        int alliveAircraftTypes = r.getInt(addr + ALLIVEAIRCRAFTTYPES + FACTORYTYPESOFFSET);
+
+        int totalAlive = alliveUnitTypes + alliveInfantryTypes + alliveAircraftTypes;
+
         int totalBuilt = factoryProducedBuildingTypesCount + factoryProducedUnitTypesCount +
                          factoryProducedInfantryTypesCount + factoryProducedAircraftTypesCount +
                          totalKilledUnits + totalKilledBuildings;
 
         si.built = totalBuilt;
+        si.alive = totalAlive;
 
         _scoreInfos[i] = si;
     }
